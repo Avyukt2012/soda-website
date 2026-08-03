@@ -1,6 +1,9 @@
 import { gsap, ScrollTrigger } from '../scroll/smooth.js';
 import { canScroll, setSpin } from '../core/can.js';
+import { berryState } from '../core/berries.js';
+import { leafState } from '../core/leaves.js';
 import { camera } from '../core/stage.js';
+import { postState } from '../core/post.js';
 import { STAGE, isMobile } from '../config.js';
 
 const TAU = Math.PI * 2;
@@ -60,6 +63,35 @@ export function initChoreography() {
         .to(canScroll, { y: -0.05, roll: -0.25, scale: 0.52, ease: 'power2.out' }, 5)
         .to(spin, { value: TAU * 3.75, ease: 'power2.out', onUpdate: applySpin }, 5)
         .to(camera.position, { z: STAGE.distance * 1.08, ease: 'power2.out' }, 5);
+
+    // Berries: scattered -> captured into orbit -> burst for inspection ->
+    // recaptured -> dissolved into the eco act.
+    journey
+        .to(berryState, { capture: 1, repel: 0.55, ease: 'power2.inOut' }, 0)
+        .to(berryState, { explode: 1, capture: 0.25, ease: 'power1.inOut' }, 1)
+        .to(berryState, { explode: 0, capture: 1, spread: 0.8, ease: 'power2.inOut' }, 2)
+        .to(berryState, { capture: 1, spread: 0.62, ease: 'power2.inOut' }, 3)
+        .to(berryState, { dissolve: 1, opacity: 0.15, ease: 'power2.in' }, 4)
+        .to(berryState, { dissolve: 0.82, opacity: 0.35, ease: 'power2.out' }, 5);
+
+    journey
+        .to(leafState, { spread: 1.25, drift: 1.5, ease: 'none' }, 0)
+        .to(leafState, { spread: 1.5, opacity: 0.55, ease: 'none' }, 2)
+        .to(leafState, { spread: 1.9, opacity: 0.2, ease: 'none' }, 4);
+
+    // Act 3 - the pour. Liquid floods the frame, then drains away as the
+    // flavour panels arrive.
+    gsap.timeline({
+        scrollTrigger: {
+            trigger: '#act-pour',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+        },
+    })
+        .fromTo(postState, { fill: 0 }, { fill: 0.62, ease: 'power1.inOut', duration: 1 })
+        .to(postState, { fill: 1.05, ease: 'power2.inOut', duration: 0.8 })
+        .to(postState, { fill: 0, ease: 'power2.in', duration: 1 });
 
     ['#act-handoff', '#act-anatomy', '#act-pour', '#act-flavour', '#act-eco'].forEach((sel) => {
         if (document.querySelector(sel)) ScrollTrigger.create(pin(sel));
