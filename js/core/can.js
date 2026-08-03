@@ -18,6 +18,18 @@ const state = {
     bob: true,
 };
 
+// Scroll choreography writes here; mouse tilt and idle bob are composited on
+// top each frame so the two never overwrite each other.
+export const canScroll = {
+    x: 0,
+    y: 0,
+    z: 0,
+    roll: STAGE.roll,
+    pitch: 0,
+    scale: 1,
+    bobAmount: 1,
+};
+
 let baseMaterials = [];
 const textures = {};
 
@@ -84,10 +96,12 @@ onFrame((delta, elapsed) => {
     state.smoothY = damp(state.smoothY, state.mouseY, MOTION.mouseEase, delta);
 
     canPivot.rotation.y = state.smoothX * MOTION.orbitAzimuth + state.spin;
-    canPivot.rotation.x = state.smoothY * MOTION.orbitPolar;
+    canPivot.rotation.x = state.smoothY * MOTION.orbitPolar + canScroll.pitch;
 
-    if (state.bob) {
-        const phase = (elapsed / MOTION.bobPeriod) * Math.PI * 2;
-        canRig.position.y = Math.sin(phase) * MOTION.bobAmplitude;
-    }
+    const phase = (elapsed / MOTION.bobPeriod) * Math.PI * 2;
+    const bob = Math.sin(phase) * MOTION.bobAmplitude * canScroll.bobAmount;
+
+    canRig.position.set(canScroll.x, canScroll.y + bob, canScroll.z);
+    canRig.rotation.z = canScroll.roll;
+    canRig.scale.setScalar(canScroll.scale);
 });

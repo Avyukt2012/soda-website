@@ -79,6 +79,11 @@ body.is-ready #gl {
     }
 }
 
+.split-line {
+    overflow: hidden;
+    padding-bottom: 0.06em;
+}
+
 #perf {
     position: fixed;
     left: 12px;

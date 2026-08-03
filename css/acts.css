@@ -1,0 +1,282 @@
+.act {
+    position: relative;
+    z-index: 100;
+    width: 100%;
+    pointer-events: none;
+}
+
+.act__pin {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6%;
+    overflow: hidden;
+}
+
+.act--handoff { height: 220vh; }
+.act--anatomy { height: 240vh; }
+.act--pour    { height: 220vh; }
+.act--flavour { height: 240vh; }
+.act--eco     { height: 180vh; }
+.act--reviews { height: 100vh; }
+.act--footer  { height: 100vh; }
+
+.eyebrow {
+    font-family: var(--font-nav);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+.act-title {
+    font-family: var(--font-heading);
+    font-size: clamp(3.5rem, 8vw, 9rem);
+    line-height: 0.82;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.act-lede {
+    color: var(--muted-color);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 38ch;
+    margin-top: 1.75rem;
+}
+
+/* Act 2 - anatomy labels */
+.anatomy-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.anatomy-copy {
+    position: absolute;
+    top: 14vh;
+    left: 0;
+}
+
+.anatomy-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    opacity: 0;
+}
+
+.anatomy-label__line {
+    width: 84px;
+    height: 1px;
+    overflow: visible;
+}
+
+.anatomy-label__line path {
+    stroke: var(--accent);
+    stroke-width: 1.25;
+    fill: none;
+}
+
+.anatomy-label__text {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+}
+
+.anatomy-label__name {
+    font-family: var(--font-nav);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+.anatomy-label__note {
+    font-size: 0.72rem;
+    color: var(--muted-color);
+    letter-spacing: 0.06em;
+}
+
+/* Act 3 - pour */
+.pour-copy {
+    text-align: center;
+    max-width: 22ch;
+}
+
+/* Act 4 - flavour horizontal */
+.flavour-track {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    width: max-content;
+    will-change: transform;
+}
+
+.flavour-panel {
+    width: 100vw;
+    height: 100vh;
+    flex: 0 0 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8%;
+}
+
+.flavour-panel__index {
+    font-family: var(--font-nav);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--muted-color);
+}
+
+.flavour-panel__name {
+    font-family: var(--font-heading);
+    font-size: clamp(4rem, 11vw, 12rem);
+    line-height: 0.8;
+    margin: 0.5rem 0 1.5rem;
+}
+
+.flavour-panel__notes {
+    display: flex;
+    gap: 2.5rem;
+    font-family: var(--font-nav);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--muted-color);
+}
+
+/* Act 6 - marquee */
+.marquee {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.marquee__row {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    will-change: transform;
+}
+
+.marquee__item {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 5.5vw, 5.5rem);
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0.85;
+}
+
+.marquee__item span {
+    color: var(--accent);
+}
+
+/* Act 7 - footer */
+.footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+}
+
+.footer-title {
+    font-family: var(--font-heading);
+    font-size: clamp(4.5rem, 14vw, 16rem);
+    line-height: 0.78;
+}
+
+.footer-meta {
+    display: flex;
+    gap: 2rem;
+    font-family: var(--font-nav);
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted-color);
+}
+
+.magnetic {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 100px;
+    padding: 1.1rem 1.1rem 1.1rem 2.2rem;
+    font-family: var(--font-nav);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    will-change: transform;
+}
+
+.magnetic__dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent-ink);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+}
+
+.scroll-cue {
+    position: fixed;
+    left: 50%;
+    bottom: 2.2rem;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-nav);
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted-color);
+    pointer-events: none;
+}
+
+.scroll-cue__rail {
+    width: 1px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-cue__rail::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform-origin: top;
+    animation: cueRun 2.1s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+
+@keyframes cueRun {
+    0%   { transform: scaleY(0); transform-origin: top; }
+    45%  { transform: scaleY(1); transform-origin: top; }
+    55%  { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@media (max-width: 900px) {
+    .act--handoff { height: 180vh; }
+    .act--anatomy { height: 200vh; }
+    .act--pour    { height: 180vh; }
+    .act--flavour { height: 200vh; }
+    .act--eco     { height: 150vh; }
+    .anatomy-copy { position: static; max-width: none; }
+}

@@ -2,6 +2,9 @@ import { render, renderer } from './core/stage.js';
 import { onFrame, start } from './core/loop.js';
 import { initCan } from './core/can.js';
 import { initBubbles } from './ui/bubbles.js';
+import { ScrollTrigger } from './scroll/smooth.js';
+import { initChoreography } from './acts/choreography.js';
+import { initTextReveals, initHeroIntro, initMarquee, initMagnetic } from './ui/text.js';
 
 function initPerfOverlay() {
     if (!new URLSearchParams(location.search).has('debug')) return;
@@ -29,16 +32,22 @@ async function boot() {
     start();
     initPerfOverlay();
     initBubbles();
+    initMarquee();
+    initMagnetic();
 
     try {
         await initCan();
     } catch (err) {
         console.error('[boot] can failed to load', err);
         document.body.dataset.bootError = String(err);
-        throw err;
     }
 
+    initChoreography();
+    initTextReveals();
+    initHeroIntro();
+
     document.body.classList.add('is-ready');
+    ScrollTrigger.refresh();
 }
 
 boot();
