@@ -8,6 +8,7 @@ import { ecoState } from '../core/particles.js';
 import { STAGE, isMobile } from '../config.js';
 
 const TAU = Math.PI * 2;
+const SCRUB = 1;
 
 function pin(selector) {
     return {
@@ -16,7 +17,7 @@ function pin(selector) {
         end: 'bottom bottom',
         pin: `${selector} .act__pin`,
         pinSpacing: false,
-        scrub: 1,
+        scrub: SCRUB,
     };
 }
 
@@ -24,96 +25,91 @@ export function initChoreography() {
     const spin = { value: 0 };
     const applySpin = () => setSpin(spin.value);
 
-    // The can's journey is one continuous timeline across the whole document,
-    // so every act hands off to the next without a reset.
+    // One timeline owns every canScroll transform channel for the whole
+    // document. Two timelines writing the same property with different scrub
+    // lag is what made the can judder through the pour.
+    //
+    // Every tween is duration 1 at an integer position, so each segment ends
+    // exactly where the next begins - no dead gaps where the can freezes.
     const journey = gsap.timeline({
         scrollTrigger: {
             trigger: document.body,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 1.1,
+            scrub: SCRUB,
         },
+        defaults: { duration: 1, ease: 'none' },
     });
 
-    // Hero -> Handoff: can drifts left and spins a full turn as the headline leaves.
+    // 0 -> 1  Hero into the handoff: drifts left, one slow turn.
     journey
-        .to(canScroll, { x: isMobile ? 0 : -0.55, scale: 0.92, roll: -0.18, bobAmount: 0.6, ease: 'power2.inOut' }, 0)
-        .to(spin, { value: TAU, ease: 'power2.inOut', onUpdate: applySpin }, 0)
-        .to(camera.position, { z: STAGE.distance * 0.86, ease: 'power2.inOut' }, 0)
+        .to(canScroll, { x: isMobile ? 0 : -0.5, scale: 0.94, roll: -0.2, bobAmount: 0.65 }, 0)
+        .to(spin, { value: TAU * 0.6, onUpdate: applySpin }, 0)
+        .to(camera.position, { z: STAGE.distance * 0.88 }, 0)
 
-        // Handoff -> Anatomy: can stands upright on the right, opened for inspection.
-        .to(canScroll, { x: isMobile ? 0 : 0.62, y: 0.05, roll: 0, pitch: 0.05, scale: 0.86, ease: 'power1.inOut' }, 1)
-        .to(spin, { value: TAU * 1.5, ease: 'power1.inOut', onUpdate: applySpin }, 1)
-        .to(camera.position, { z: STAGE.distance * 0.94, ease: 'power1.inOut' }, 1)
+        // 1 -> 2  Anatomy: stands upright on the right for inspection.
+        .to(canScroll, { x: isMobile ? 0 : 0.6, y: 0.04, roll: 0, pitch: 0.05, scale: 0.86 }, 1)
+        .to(spin, { value: TAU * 1.15, onUpdate: applySpin }, 1)
+        .to(camera.position, { z: STAGE.distance * 0.95 }, 1)
 
-        // Anatomy -> Pour: can returns to centre and tilts to pour.
-        .to(canScroll, { x: 0, y: 0.1, roll: -0.62, pitch: 0.12, scale: 0.98, bobAmount: 0.25, ease: 'power2.inOut' }, 2)
-        .to(spin, { value: TAU * 2.15, ease: 'power2.inOut', onUpdate: applySpin }, 2)
-        .to(camera.position, { z: STAGE.distance * 0.8, ease: 'power2.inOut' }, 2)
+        // 2 -> 3  Descends into the rising liquid, tipping as it goes.
+        .to(canScroll, { x: 0, y: -0.14, roll: -0.55, pitch: 0.1, scale: 0.96, bobAmount: 0.18 }, 2)
+        .to(spin, { value: TAU * 1.62, onUpdate: applySpin }, 2)
+        .to(camera.position, { z: STAGE.distance * 0.84 }, 2)
 
-        // Pour -> Flavour: can squares up, camera pulls back for the panels.
-        .to(canScroll, { x: isMobile ? 0 : -0.15, y: 0, roll: -0.3, pitch: 0, scale: 0.9, bobAmount: 0.5, ease: 'power2.inOut' }, 3)
-        .to(spin, { value: TAU * 2.5, ease: 'power2.inOut', onUpdate: applySpin }, 3)
-        .to(camera.position, { z: STAGE.distance, ease: 'power2.inOut' }, 3)
+        // 3 -> 4  Lifts clear as the liquid drains, squares up for the panels.
+        .to(canScroll, { x: isMobile ? 0 : -0.12, y: 0.02, roll: -0.28, pitch: 0, scale: 0.9, bobAmount: 0.5 }, 3)
+        .to(spin, { value: TAU * 2.1, onUpdate: applySpin }, 3)
+        .to(camera.position, { z: STAGE.distance }, 3)
 
-        // Flavour -> Eco: can shrinks and lifts as it dissolves.
-        .to(canScroll, { x: 0, y: 0.22, roll: -0.5, scale: 0.62, bobAmount: 1, ease: 'power2.inOut' }, 4)
-        .to(spin, { value: TAU * 3.4, ease: 'power2.inOut', onUpdate: applySpin }, 4)
+        // 4 -> 5  Rises and shrinks toward the dissolve.
+        .to(canScroll, { x: 0, y: 0.2, roll: -0.46, scale: 0.62, bobAmount: 1 }, 4)
+        .to(spin, { value: TAU * 2.75, onUpdate: applySpin }, 4)
 
-        // Eco -> Footer: can settles above the wordmark. Sits high and small
-        // so it clears the type on tall viewports, not just 16:9.
-        .to(canScroll, { y: 0.62, roll: -0.25, scale: 0.4, ease: 'power2.out' }, 5)
-        .to(spin, { value: TAU * 3.75, ease: 'power2.out', onUpdate: applySpin }, 5)
-        .to(camera.position, { z: STAGE.distance * 1.08, ease: 'power2.out' }, 5);
+        // 5 -> 6  Settles small and centred above the wordmark.
+        .to(canScroll, { y: 0.5, roll: -0.24, scale: 0.42 }, 5)
+        .to(spin, { value: TAU * 3.1, onUpdate: applySpin }, 5)
+        .to(camera.position, { z: STAGE.distance * 1.06 }, 5);
 
-    // Berries: scattered -> captured into orbit -> burst for inspection ->
-    // recaptured -> dissolved into the eco act.
+    // Berries and leaves ride the same timeline, so they never lag the can.
     journey
-        .to(berryState, { capture: 1, repel: 0.55, ease: 'power2.inOut' }, 0)
-        .to(berryState, { explode: 1, capture: 0.25, ease: 'power1.inOut' }, 1)
-        .to(berryState, { explode: 0, capture: 1, spread: 0.8, ease: 'power2.inOut' }, 2)
-        .to(berryState, { capture: 1, spread: 0.62, ease: 'power2.inOut' }, 3)
-        .to(berryState, { dissolve: 1, opacity: 0.15, ease: 'power2.in' }, 4)
-        .to(berryState, { dissolve: 0.82, opacity: 0.35, ease: 'power2.out' }, 5);
+        .to(berryState, { capture: 1, repel: 0.55 }, 0)
+        .to(berryState, { explode: 1, capture: 0.25 }, 1)
+        .to(berryState, { explode: 0, capture: 1, spread: 0.8 }, 2)
+        .to(berryState, { capture: 1, spread: 0.62 }, 3)
+        .to(berryState, { dissolve: 1, opacity: 0.15 }, 4)
+        .to(berryState, { dissolve: 0.82, opacity: 0.35 }, 5)
 
-    journey
-        .to(leafState, { spread: 1.25, drift: 1.5, ease: 'none' }, 0)
-        .to(leafState, { spread: 1.5, opacity: 0.55, ease: 'none' }, 2)
-        .to(leafState, { spread: 1.9, opacity: 0.2, ease: 'none' }, 4);
+        .to(leafState, { spread: 1.25, drift: 1.5 }, 0)
+        .to(leafState, { spread: 1.5, opacity: 0.55 }, 2)
+        .to(leafState, { spread: 1.9, opacity: 0.2 }, 4);
 
-    // Act 3 - the pour. Liquid floods the frame, then drains away as the
-    // flavour panels arrive.
+    // Act 3 owns the liquid level only - never the can.
     gsap.timeline({
         scrollTrigger: {
             trigger: '#act-pour',
             start: 'top bottom',
             end: 'bottom top',
-            scrub: 1,
+            scrub: SCRUB,
         },
+        defaults: { ease: 'none' },
     })
-        // Liquid climbs, briefly closes over the can, then drains away.
-        .fromTo(postState, { fill: 0 }, { fill: 0.55, ease: 'power1.out', duration: 1.1 })
-        .to(postState, { fill: 1.04, ease: 'power2.in', duration: 0.7 })
-        .to(postState, { fill: 0.92, ease: 'power1.inOut', duration: 0.35 })
-        .to(postState, { fill: 0, ease: 'power3.in', duration: 0.95 })
-        // The can settles into the rising liquid rather than being crossed by
-        // a line, then lifts clear as it drains.
-        .to(canScroll, { y: -0.16, roll: -0.78, duration: 1.5, ease: 'power1.inOut' }, 0)
-        .to(canScroll, { y: 0.12, roll: -0.42, duration: 1.3, ease: 'power2.out' }, 1.8);
+        .fromTo(postState, { fill: 0 }, { fill: 0.58, duration: 1.15, ease: 'power1.out' })
+        .to(postState, { fill: 1.02, duration: 0.75, ease: 'power1.in' })
+        .to(postState, { fill: 0.94, duration: 0.35 })
+        .to(postState, { fill: 0, duration: 1.0, ease: 'power2.in' });
 
-    // Act 5 - the can breaks into particles that reform as a loop.
+    // Act 5 owns particle state and can opacity - both untouched by journey.
     gsap.timeline({
         scrollTrigger: {
             trigger: '#act-eco',
             start: 'top bottom',
             end: 'bottom top',
-            scrub: 1,
+            scrub: SCRUB,
         },
     })
         .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' })
         .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 2.2, ease: 'none' }, 0)
-        // The can hands itself over to the particles rather than sitting
-        // behind them, then reassembles for the footer.
         .to(canScroll, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 0.25)
         .to(canScroll, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.85)
         .to(ecoState, { opacity: 0, duration: 0.4, ease: 'power2.in' }, 2.0);
@@ -122,7 +118,6 @@ export function initChoreography() {
         if (document.querySelector(sel)) ScrollTrigger.create(pin(sel));
     });
 
-    // Scroll cue retires once the journey starts.
     const cue = document.getElementById('scroll-cue');
     if (cue) {
         gsap.to(cue, {

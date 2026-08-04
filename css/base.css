@@ -85,7 +85,10 @@ body.is-ready #gl {
    so the clip boundary moves out without shifting layout. */
 .split-line {
     overflow: hidden;
-    padding-bottom: 0.08em;
+    padding-top: 0.34em;
+    margin-top: -0.34em;
+    padding-bottom: 0.2em;
+    margin-bottom: -0.12em;
     padding-left: 0.14em;
     padding-right: 0.14em;
     margin-left: -0.14em;

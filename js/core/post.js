@@ -30,6 +30,7 @@ const LiquidShader = {
         uTime: { value: 0 },
         uFill: { value: 0 },
         uColor: { value: new THREE.Color(0x10b981) },
+        uAspect: { value: window.innerWidth / window.innerHeight },
     },
     vertexShader: `
         varying vec2 vUv;
@@ -43,17 +44,44 @@ const LiquidShader = {
         uniform float uTime;
         uniform float uFill;
         uniform vec3 uColor;
+        uniform float uAspect;
         varying vec2 vUv;
         ${NOISE}
 
-        // Layered surface: a slow swell, a mid roll, and a fine chop. One
-        // frequency alone is what made this read as a drawn line.
+        // Two low frequencies only. Heavy fbm on the surface is what turned
+        // the waterline into a fog bank.
         float surfaceAt(float x) {
-            float s = uFill * 1.16 - 0.09;
-            s += (fbm(vec2(x * 1.9 + uTime * 0.11, uTime * 0.08)) - 0.5) * 0.085;
-            s += sin(x * 7.0 - uTime * 0.62) * 0.016;
-            s += sin(x * 19.0 + uTime * 1.25) * 0.0055;
+            float s = uFill * 1.14 - 0.07;
+            s += sin(x * 4.3 - uTime * 0.45) * 0.013;
+            s += sin(x * 9.7 + uTime * 0.78) * 0.006;
+            s += (noise(vec2(x * 2.1, uTime * 0.13)) - 0.5) * 0.022;
             return s;
+        }
+
+        // Aspect-corrected cells with staggered rows and jittered centres.
+        // Square cells keep them round; the stagger stops it reading as a
+        // lattice. Rim-lit rather than filled, so they look like gas not paint.
+        float bubbles(vec2 uv, float t) {
+            vec2 p = vec2(uv.x * uAspect, uv.y) * 10.5;
+            p.y += t * 0.8;
+
+            float row = floor(p.y);
+            p.x += fract(sin(row * 91.37) * 43758.5453) * 1.7;
+
+            vec2 cell = floor(p);
+            vec2 f = fract(p);
+            float h = hash(cell);
+            if (h < 0.74) return 0.0;
+
+            vec2 c = vec2(0.25 + hash(cell + 1.7) * 0.5, 0.25 + hash(cell + 5.3) * 0.5);
+            float rad = 0.055 + hash(cell + 9.1) * 0.085;
+            float dd = length(f - c);
+
+            // Soft-edged rim; a hard ring reads as a drawn circle, not gas.
+            float body = smoothstep(rad, rad * 0.35, dd);
+            float rim = smoothstep(rad * 1.05, rad * 0.78, dd) - smoothstep(rad * 0.78, rad * 0.42, dd);
+            float fade = 0.55 + hash(cell + 21.4) * 0.45;
+            return (body * 0.07 + max(rim, 0.0) * 0.3) * fade;
         }
 
         void main() {
@@ -68,47 +96,39 @@ const LiquidShader = {
             float surface = surfaceAt(uv.x);
             float d = surface - uv.y;
 
-            // Everything well clear of the waterline skips the expensive work.
-            if (d < -0.07) {
+            if (d < -0.02) {
                 gl_FragColor = vec4(base, 1.0);
                 return;
             }
 
-            float inside = smoothstep(-0.0035, 0.0035, d);
+            float inside = smoothstep(-0.0012, 0.0012, d);
             float depth = clamp(d / max(uFill, 0.08), 0.0, 1.0);
 
-            // Refraction strengthens with depth and carries a noise wobble so
-            // it distorts organically instead of shearing uniformly.
-            float warp = fbm(vec2(uv.x * 5.5, uv.y * 5.5 - uTime * 0.45)) - 0.5;
-            vec2 disp = vec2(
-                sin(uv.y * 20.0 + uTime * 1.05) * 0.011 + warp * 0.022,
-                cos(uv.x * 13.0 - uTime * 0.85) * 0.007
-            ) * (0.22 + depth * 1.5) * inside;
+            // Refraction: travelling ripples plus a vertical lift, strong
+            // enough that the can and cherries visibly bend through it.
+            float ripple = sin(uv.y * 38.0 - uTime * 1.9) * 0.0052
+                         + sin(uv.x * 23.0 + uTime * 1.25) * 0.0034;
+            vec2 disp = vec2(ripple * (0.5 + depth * 1.3), -depth * 0.022);
+            vec3 refr = texture2D(tDiffuse, uv + disp).rgb;
 
-            // Chromatic split, strongest right under the surface
-            float ca = 0.0022 * inside * (1.0 - depth * 0.55);
-            vec3 refr;
-            refr.r = texture2D(tDiffuse, uv + disp + vec2(ca, 0.0)).r;
-            refr.g = texture2D(tDiffuse, uv + disp).g;
-            refr.b = texture2D(tDiffuse, uv + disp - vec2(ca, 0.0)).b;
+            // Surface reflection: mirror the scene about the waterline and mix
+            // in by a Fresnel-ish term. This is what actually sells water.
+            float mirrorY = 2.0 * surface - uv.y;
+            vec3 refl = texture2D(tDiffuse, vec2(uv.x + ripple * 1.6, clamp(mirrorY, 0.0, 1.0))).rgb;
+            float fres = pow(1.0 - clamp(depth * 3.2, 0.0, 1.0), 2.5);
 
-            // Absorption: light falls off and colour saturates with depth
-            vec3 liquid = refr * mix(vec3(1.0), uColor * 2.0, 0.34 + depth * 0.38);
-            liquid *= exp(-depth * 1.15);
-            liquid += uColor * depth * 0.12;
+            // Tinted, absorbing body
+            vec3 liquid = mix(refr, refr * uColor * 1.9, 0.3 + depth * 0.34);
+            liquid *= mix(1.0, 0.74, depth);
+            liquid = mix(liquid, refl * mix(vec3(1.0), uColor * 1.6, 0.5), fres * 0.32);
+            liquid += uColor * depth * 0.07;
 
-            // Caustics gathering just beneath the waterline
-            float caust = fbm(vec2(uv.x * 6.5 + uTime * 0.33, uv.y * 6.5 - uTime * 0.5));
-            liquid += uColor * pow(max(caust, 0.0), 3.0) * (1.0 - depth) * inside * 0.7;
+            liquid += bubbles(uv, uTime) * inside * (1.0 - depth * 0.35);
 
-            // Carbonation rising inside the liquid
-            float bub = fbm(vec2(uv.x * 24.0, uv.y * 24.0 + uTime * 1.5));
-            liquid += smoothstep(0.76, 0.94, bub) * inside * (0.3 - depth * 0.18);
-
-            // Meniscus: a crisp highlight plus a soft bloom, never a hard band
+            // Thin crisp waterline plus a tight highlight - no wide glow
             float edge = abs(uv.y - surface);
-            liquid += smoothstep(0.0032, 0.0, edge) * 0.5;
-            liquid += smoothstep(0.055, 0.0, edge) * 0.14;
+            liquid += smoothstep(0.0022, 0.0, edge) * 0.55;
+            liquid += smoothstep(0.012, 0.0, edge) * 0.12;
 
             gl_FragColor = vec4(mix(base, liquid, inside), 1.0);
         }`,
@@ -149,9 +169,6 @@ const GrainVignetteShader = {
 export const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
-export const liquidPass = new ShaderPass(LiquidShader);
-composer.addPass(liquidPass);
-
 export const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     isMobile ? 0.28 : 0.45,
@@ -161,6 +178,12 @@ export const bloomPass = new UnrealBloomPass(
 composer.addPass(bloomPass);
 
 composer.addPass(new OutputPass());
+
+// Liquid runs AFTER OutputPass, in tone-mapped LDR space. Upstream it was
+// operating on linear HDR values, so its highlights blew out through ACES and
+// got smeared by bloom - that is what made the water look like fog.
+export const liquidPass = new ShaderPass(LiquidShader);
+composer.addPass(liquidPass);
 
 const grainPass = new ShaderPass(GrainVignetteShader);
 composer.addPass(grainPass);
@@ -173,6 +196,7 @@ export function setLiquidColor(hex) {
 
 function sizeComposer() {
     const dpr = renderer.getPixelRatio();
+    liquidPass.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
     composer.setSize(window.innerWidth, window.innerHeight);
     composer.setPixelRatio(dpr);
     bloomPass.resolution.set(window.innerWidth, window.innerHeight);
