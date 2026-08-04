@@ -113,11 +113,15 @@ export function initChoreography() {
             scrub: SCRUB,
         },
     })
-        .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' })
-        .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 2.2, ease: 'none' }, 0)
-        .to(canScroll, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 0.25)
-        .to(canScroll, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.85)
-        .to(ecoState, { opacity: 0, duration: 0.4, ease: 'power2.in' }, 2.0);
+        // The ring has to resolve and hold on screen. Previously progress hit 1
+        // at the same moment opacity started fading, so the loop it forms was
+        // never actually visible - only the scattered middle.
+        .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' })
+        .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 1.35, ease: 'power2.inOut' }, 0)
+        .to(ecoState, { progress: 1, duration: 0.75 })
+        .to(canScroll, { opacity: 0, duration: 0.45, ease: 'power2.in' }, 0.2)
+        .to(canScroll, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 2.25)
+        .to(ecoState, { opacity: 0, duration: 0.45, ease: 'power2.in' }, 2.35);
 
     ['#act-handoff', '#act-anatomy', '#act-pour', '#act-flavour', '#act-eco'].forEach((sel) => {
         if (document.querySelector(sel)) ScrollTrigger.create(pin(sel));

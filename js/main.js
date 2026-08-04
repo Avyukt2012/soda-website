@@ -104,7 +104,7 @@ async function boot() {
 
     onFlavorChange((flavor) => {
         tick(1);
-        setParticleColor(flavor === 'blue' ? 0xbfdbfe : 0xfbcfe8);
+        setParticleColor(flavor === 'blue' ? 0xd6e4f0 : 0xdfe8ee);
     });
 
     // Let one real frame run so every instanceMatrix holds live transforms

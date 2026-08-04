@@ -3,7 +3,7 @@ import { scene } from './stage.js';
 import { onFrame } from './loop.js';
 import { isMobile } from '../config.js';
 
-const COUNT = isMobile ? 900 : 2200;
+const COUNT = isMobile ? 700 : 1600;
 
 export const ecoState = { progress: 0, opacity: 0 };
 
@@ -21,11 +21,11 @@ for (let i = 0; i < COUNT; i++) {
 
     // End: a torus ring - aluminium going round again
     const t = (i / COUNT) * Math.PI * 2;
-    const tube = 0.14 + Math.random() * 0.07;
+    const tube = 0.055 + Math.pow(Math.random(), 1.6) * 0.075;
     const phi = Math.random() * Math.PI * 2;
-    const R = 1.0;
+    const R = 0.95;
     ringTargets[i * 3] = (R + tube * Math.cos(phi)) * Math.cos(t);
-    ringTargets[i * 3 + 1] = tube * Math.sin(phi);
+    ringTargets[i * 3 + 1] = tube * Math.sin(phi) * 0.55;
     ringTargets[i * 3 + 2] = (R + tube * Math.cos(phi)) * Math.sin(t);
 
     seeds[i] = Math.random();
@@ -45,7 +45,7 @@ const material = new THREE.ShaderMaterial({
         uProgress: { value: 0 },
         uOpacity: { value: 0 },
         uTime: { value: 0 },
-        uColor: { value: new THREE.Color(0xfbcfe8) },
+        uColor: { value: new THREE.Color(0xdfe8ee) },
         uSize: { value: isMobile ? 4.5 : 6.5 },
         uDpr: { value: Math.min(window.devicePixelRatio, 1.5) },
     },
@@ -65,16 +65,16 @@ const material = new THREE.ShaderMaterial({
             float local = clamp((uProgress - aSeed * 0.35) / 0.65, 0.0, 1.0);
             float burst = sin(local * 3.14159);
 
-            vec3 scatter = normalize(aStart + vec3(0.001)) * burst * (0.42 + aSeed * 0.5);
+            vec3 scatter = normalize(aStart + vec3(0.001)) * burst * (0.16 + aSeed * 0.26);
             vec3 pos = mix(aStart, aRing, smoothstep(0.0, 1.0, local)) + scatter;
 
             pos.y += sin(uTime * 0.6 + aSeed * 6.28) * 0.04;
 
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
             gl_Position = projectionMatrix * mv;
-            gl_PointSize = uSize * uDpr * (1.0 + aSeed) * (3.0 / -mv.z);
+            gl_PointSize = uSize * uDpr * (0.35 + pow(aSeed, 2.4) * 3.0) * (3.0 / -mv.z);
 
-            vFade = 0.35 + burst * 0.65;
+            vFade = (0.45 + burst * 0.55) * (0.5 + aSeed * 0.9);
         }`,
     fragmentShader: `
         precision mediump float;
@@ -104,10 +104,15 @@ export function setParticleColor(hex) {
     material.uniforms.uColor.value.setHex(hex);
 }
 
+// The ring lies in XZ. Spun only on Y the camera sees it edge-on, as a line -
+// tilting it forward is what makes it read as a loop.
+points.rotation.x = -0.62;
+
 onFrame((delta, elapsed) => {
     material.uniforms.uTime.value = elapsed;
     material.uniforms.uProgress.value = ecoState.progress;
     material.uniforms.uOpacity.value = ecoState.opacity;
     points.visible = ecoState.opacity > 0.01;
-    points.rotation.y = elapsed * 0.08;
+    points.rotation.y = elapsed * 0.16;
+    points.rotation.x = -0.62 + Math.sin(elapsed * 0.25) * 0.06;
 });
