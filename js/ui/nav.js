@@ -39,7 +39,6 @@ export function initNav() {
         });
     };
 
-    // Scroll spy: the section occupying the middle of the viewport wins.
     MAP.forEach(({ target }) => {
         const el = document.querySelector(target);
         if (!el) return;
@@ -51,8 +50,6 @@ export function initNav() {
         });
     });
 
-    // The header retreats while travelling down and returns on any upward
-    // movement, so it is never in the way but never far.
     const header = document.querySelector('.header');
     if (!header) return;
 
@@ -79,8 +76,6 @@ export function initNav() {
         },
     });
 
-    // Reaching for the top of the screen brings the nav back without needing
-    // to scroll up for it.
     window.addEventListener('mousemove', (e) => {
         const next = e.clientY < 110;
         if (next === nearTop) return;

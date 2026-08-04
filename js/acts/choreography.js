@@ -24,18 +24,6 @@ export function initChoreography() {
     const spin = { value: 0 };
     const applySpin = () => setSpin(spin.value);
 
-    // One timeline owns every canScroll transform channel for the whole
-    // document. Two timelines writing the same property with different scrub
-    // lag is what made the can judder through the pour.
-    //
-    // Every tween is duration 1 at an integer position, so each segment ends
-    // exactly where the next begins - no dead gaps where the can freezes.
-    //
-    // The easing matters as much as the timing. Linear kept position
-    // continuous but let velocity flip sign instantly at each join, so the can
-    // snapped from travelling right to travelling left with no slow-down.
-    // power2.inOut brings velocity to zero at every boundary: the can settles
-    // into an act and accelerates out of it.
     const journey = gsap.timeline({
         scrollTrigger: {
             trigger: document.body,
@@ -46,37 +34,30 @@ export function initChoreography() {
         defaults: { duration: 1, ease: 'power2.inOut' },
     });
 
-    // 0 -> 1  Hero into the handoff: drifts left, one slow turn.
     journey
         .to(canScroll, { x: isMobile ? 0 : -0.42, z: -0.3, scale: 0.94, roll: -0.2, bobAmount: 0.65 }, 0)
         .to(spin, { value: TAU * 0.6, onUpdate: applySpin }, 0)
         .to(camera.position, { z: STAGE.distance * 0.88 }, 0)
 
-        // 1 -> 2  Anatomy: stands upright on the right for inspection.
         .to(canScroll, { x: isMobile ? 0 : 0.5, z: 0, y: 0.04, roll: 0, pitch: 0.05, scale: 0.86 }, 1)
         .to(spin, { value: TAU * 1.15, onUpdate: applySpin }, 1)
         .to(camera.position, { z: STAGE.distance * 0.95 }, 1)
 
-        // 2 -> 3  Descends into the rising liquid, tipping as it goes.
         .to(canScroll, { x: 0, z: -0.22, y: -0.14, roll: -0.55, pitch: 0.1, scale: 0.96, bobAmount: 0.18 }, 2)
         .to(spin, { value: TAU * 1.62, onUpdate: applySpin }, 2)
         .to(camera.position, { z: STAGE.distance * 0.84 }, 2)
 
-        // 3 -> 4  Lifts clear as the liquid drains, squares up for the panels.
         .to(canScroll, { x: isMobile ? 0 : -0.12, z: 0, y: 0.02, roll: -0.28, pitch: 0, scale: 0.9, bobAmount: 0.5 }, 3)
         .to(spin, { value: TAU * 2.1, onUpdate: applySpin }, 3)
         .to(camera.position, { z: STAGE.distance }, 3)
 
-        // 4 -> 5  Rises and shrinks toward the dissolve.
         .to(canScroll, { x: 0, z: -0.18, y: 0.2, roll: -0.46, scale: 0.62, bobAmount: 1 }, 4)
         .to(spin, { value: TAU * 2.75, onUpdate: applySpin }, 4)
 
-        // 5 -> 6  Settles small and centred above the wordmark.
         .to(canScroll, { z: 0, y: 0.5, roll: -0.24, scale: 0.42 }, 5)
         .to(spin, { value: TAU * 3.1, onUpdate: applySpin }, 5)
         .to(camera.position, { z: STAGE.distance * 1.06 }, 5);
 
-    // Berries and leaves ride the same timeline, so they never lag the can.
     journey
         .to(berryState, { capture: 1, repel: 0.55 }, 0)
         .to(berryState, { explode: 1, capture: 0.25 }, 1)
@@ -89,7 +70,6 @@ export function initChoreography() {
         .to(leafState, { spread: 1.5, opacity: 0.55 }, 2)
         .to(leafState, { spread: 1.9, opacity: 0.2 }, 4);
 
-    // Act 3 owns the liquid level only - never the can.
     gsap.timeline({
         scrollTrigger: {
             trigger: '#act-pour',
@@ -104,7 +84,6 @@ export function initChoreography() {
         .to(postState, { fill: 0.94, duration: 0.35 })
         .to(postState, { fill: 0, duration: 1.0, ease: 'power2.in' });
 
-    // Act 5 owns particle state and can opacity - both untouched by journey.
     gsap.timeline({
         scrollTrigger: {
             trigger: '#act-eco',
@@ -113,9 +92,6 @@ export function initChoreography() {
             scrub: SCRUB,
         },
     })
-        // The ring has to resolve and hold on screen. Previously progress hit 1
-        // at the same moment opacity started fading, so the loop it forms was
-        // never actually visible - only the scattered middle.
         .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' })
         .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 1.35, ease: 'power2.inOut' }, 0)
         .to(ecoState, { progress: 1, duration: 0.75 })

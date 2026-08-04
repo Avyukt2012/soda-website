@@ -22,8 +22,6 @@ float fbm(vec2 p){
     return v;
 }`;
 
-// Liquid rises from the bottom of the frame, refracting and tinting whatever
-// has already been rendered behind it. Passthrough when uFill is 0.
 const LiquidShader = {
     uniforms: {
         tDiffuse: { value: null },
@@ -180,9 +178,6 @@ composer.addPass(bloomPass);
 
 composer.addPass(new OutputPass());
 
-// Liquid runs AFTER OutputPass, in tone-mapped LDR space. Upstream it was
-// operating on linear HDR values, so its highlights blew out through ACES and
-// got smeared by bloom - that is what made the water look like fog.
 export const liquidPass = new ShaderPass(LiquidShader);
 composer.addPass(liquidPass);
 
@@ -204,9 +199,6 @@ function sizeComposer() {
 }
 sizeComposer();
 
-// Reallocating the composer's render targets and the bloom mip chain is the
-// expensive part of a resize. Coalesce it so dragging a window edge does not
-// realloc every frame.
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
     liquidPass.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
@@ -220,9 +212,6 @@ onFrame((delta, elapsed) => {
     grainPass.uniforms.uTime.value = elapsed;
 });
 
-// info.autoReset would clear counters between composer passes, leaving only
-// the final fullscreen triangle. Reset once per frame instead so the debug
-// overlay reports true whole-frame totals.
 renderer.info.autoReset = false;
 
 export function renderPost() {

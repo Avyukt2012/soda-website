@@ -38,7 +38,6 @@ export function initAnatomy() {
             }, at + 0.08);
     });
 
-    // Hold, then retire the whole set before the pour arrives.
     tl.to(labels, {
         opacity: 0,
         xPercent: 6,

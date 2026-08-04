@@ -1,8 +1,6 @@
 import { onFrame } from '../core/loop.js';
 import { postState } from '../core/post.js';
 
-// Synthesised rather than sampled: no downloads, no licensing, and every
-// parameter stays tunable in code.
 const STORE_KEY = 'soda-audio';
 
 let ctx = null;
@@ -28,7 +26,6 @@ function buildAmbient() {
     bus.gain.value = 0;
     bus.connect(master);
 
-    // Filtered brown noise bed - the "room"
     const noise = ctx.createBufferSource();
     noise.buffer = noiseBuffer(ctx, 4);
     noise.loop = true;
@@ -43,7 +40,6 @@ function buildAmbient() {
     noise.connect(lp).connect(noiseGain).connect(bus);
     noise.start();
 
-    // Two detuned low sines for a slow drone
     const drone = ctx.createGain();
     drone.gain.value = 0.09;
     drone.connect(bus);
@@ -64,7 +60,6 @@ function buildAmbient() {
         osc.start();
     });
 
-    // Pour swell rides the liquid fill
     const swell = ctx.createGain();
     swell.gain.value = 0;
     swell.connect(bus);
@@ -145,8 +140,6 @@ export function initAudio() {
         if (enabled) tick(1.2);
     });
 
-    // Never auto-start. Only restore a previous explicit opt-in, and only
-    // after the user has interacted with the page.
     const remembered = localStorage.getItem(STORE_KEY) === 'on';
     if (remembered) {
         const resume = () => {

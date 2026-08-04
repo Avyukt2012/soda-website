@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 
-// Real progress from Three's loading manager - no faked timeline.
 export function createLoader() {
     const el = document.createElement('div');
     el.className = 'loader';

@@ -76,7 +76,6 @@ function primeTextures() {
 async function boot() {
     const loader = createLoader();
 
-    // Registered last so every scene update for the frame has already run.
     onFrame(renderPost);
     start();
     initPerfOverlay();
@@ -107,15 +106,8 @@ async function boot() {
         setParticleColor(flavor === 'blue' ? 0xd6e4f0 : 0xdfe8ee);
     });
 
-    // Let one real frame run so every instanceMatrix holds live transforms
-    // before the warm draw; warming against zeroed matrices uploads nothing.
-    // Raced against a timer: a page opened in a background tab gets no rAF at
-    // all, and boot must never hang waiting for one.
     await nextFrameOrTimeout(250);
 
-    // Precompile every material in the scene with both flavours' assets bound
-    // and visible. A hand-rolled warm draw missed program variants that only
-    // three's own compiler walks; this is the API built for it.
     postState.fill = 0.001;
     warmBerries();
     warmParticles();
@@ -129,10 +121,6 @@ async function boot() {
         try { renderer.compile(scene, camera); } catch { /* non-fatal */ }
     }
 
-    // compileAsync builds programs but does not upload textures - those are
-    // deferred until a material first shades real fragments, which is why the
-    // first flavour switch was still paying for the blueberry maps. initTexture
-    // forces the upload now.
     primeTextures();
 
     renderPost();

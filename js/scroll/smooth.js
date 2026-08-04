@@ -12,10 +12,6 @@ const num = (key, fallback) => {
     return Number.isFinite(v) ? v : fallback;
 };
 
-// Lenis smooths the scroll position and ScrollTrigger's scrub smooths the
-// timeline on top of it. Stacked too hard they compound: the can was settling
-// 900ms after the scroll had stopped. lerp is framerate-independent and tighter
-// than the old time-based duration.
 export const LERP = num('lerp', isMobile ? 0.12 : 0.1);
 export const SCRUB = num('scrub', isMobile ? 0.3 : 0.35);
 
@@ -38,9 +34,6 @@ lenis.on('scroll', ({ velocity, progress }) => {
     ScrollTrigger.update();
 });
 
-// Lenis drives native window scroll; ScrollTrigger reads it directly.
-// One rAF owner only - GSAP's own ticker lag smoothing is disabled so it
-// never fights our clock.
 gsap.ticker.lagSmoothing(0);
 
 onFrame((delta, elapsed) => {

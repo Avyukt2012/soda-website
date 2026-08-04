@@ -50,8 +50,6 @@ export function resize() {
 
 window.addEventListener('resize', resize);
 
-// A lost context (GPU reset, driver hiccup, tab backgrounded too long) would
-// otherwise leave a permanently blank canvas with no error.
 canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
     document.body.classList.add('gl-lost');

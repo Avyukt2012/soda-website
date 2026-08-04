@@ -15,8 +15,6 @@ let active = 'cherry';
 const dummy = new THREE.Object3D();
 const instances = [];
 
-// Scroll choreography drives these; the per-frame loop blends between the
-// scattered hero layout and a captured orbit around the can.
 export const berryState = {
     capture: 0,
     explode: 0,
@@ -82,19 +80,15 @@ export async function initBerries() {
         const angle = ring * Math.PI * 2 * 3.3;
 
         instances.push({
-            // Scattered hero position, biased backward so the field reads as
-            // depth around the can rather than confetti across the type.
             home: new THREE.Vector3(
                 (Math.random() - 0.5) * 4.6,
                 (Math.random() - 0.5) * 2.8,
                 Math.random() * 1.5 - 1.25
             ),
-            // Captured orbit position around the can
             orbitRadius: 0.72 + (i % 3) * 0.26,
             orbitAngle: angle,
             orbitY: (Math.random() - 0.5) * 1.05,
             orbitSpeed: 0.16 + Math.random() * 0.2,
-            // Anatomy explode target - a loose column beside the can
             burst: new THREE.Vector3(
                 (Math.random() - 0.5) * 2.2,
                 (Math.random() - 0.5) * 2.6,
@@ -104,19 +98,12 @@ export async function initBerries() {
             spinRate: 0.4 + Math.random() * 1.1,
             phase: Math.random() * Math.PI * 2,
             bobRate: 0.5 + Math.random() * 0.7,
-            // Wider scale spread gives the field a foreground/background
-            // hierarchy instead of a uniform sprinkle.
             scale: 0.34 + Math.pow(Math.random(), 2.1) * 1.5,
             repel: new THREE.Vector3(),
         });
     }
 }
 
-// Both models must reach the GPU during load, otherwise the first flavour
-// switch pays for the blueberry upload. Visibility alone is not enough: the
-// inactive set's instanceMatrix is still all zeros at that point, so it draws
-// degenerate triangles and the driver never uploads its textures. Copy the
-// live matrices across first so the warm draw is real.
 export function warmBerries() {
     const src = sets.cherry[0];
     sets.blueberry.forEach((m) => {
@@ -158,7 +145,6 @@ onFrame((delta, elapsed) => {
     for (let i = 0; i < COUNT; i++) {
         const b = instances[i];
 
-        // Scattered hero layout, gently breathing
         const bobY = Math.sin(elapsed * b.bobRate + b.phase) * 0.09;
         tmp.set(
             b.home.x * berryState.spread,
@@ -166,7 +152,6 @@ onFrame((delta, elapsed) => {
             b.home.z * berryState.spread
         );
 
-        // Captured orbit around the can
         if (cap > 0.001) {
             const a = b.orbitAngle + elapsed * b.orbitSpeed;
             tmp.x += (Math.cos(a) * b.orbitRadius - tmp.x) * cap;
@@ -174,14 +159,12 @@ onFrame((delta, elapsed) => {
             tmp.z += (Math.sin(a) * b.orbitRadius - tmp.z) * cap;
         }
 
-        // Anatomy burst
         if (exp > 0.001) {
             tmp.x += (b.burst.x - tmp.x) * exp;
             tmp.y += (b.burst.y - tmp.y) * exp;
             tmp.z += (b.burst.z - tmp.z) * exp;
         }
 
-        // Pointer repulsion in world space
         if (berryState.repel > 0.001 && pointerWorld.lengthSq() > 0) {
             away.subVectors(tmp, pointerWorld);
             const d = away.length();

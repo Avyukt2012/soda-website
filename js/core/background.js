@@ -3,8 +3,6 @@ import { scene, camera } from './stage.js';
 import { onFrame } from './loop.js';
 import { FLAVORS } from '../config.js';
 
-// The page gradient lives in the scene rather than in CSS so it sits under the
-// liquid pass and bloom, and so it can morph with flavour in one place.
 const uniforms = {
     uInner: { value: new THREE.Color(FLAVORS.classic.inner) },
     uMid: { value: new THREE.Color(FLAVORS.classic.mid) },
@@ -56,8 +54,6 @@ const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
 quad.frustumCulled = false;
 quad.renderOrder = -1000;
 
-// Parented to the camera so it always fills the frame regardless of the
-// camera pushes the choreography performs.
 const holder = new THREE.Object3D();
 camera.add(holder);
 scene.add(camera);

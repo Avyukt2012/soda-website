@@ -42,9 +42,6 @@ export function applyFlavor(flavor, { instant = false } = {}) {
     }
     switching = true;
 
-    // A full turn, swapped at the fastest part of the rotation. Runs on its
-    // own spin channel so it sums with the scroll journey rather than
-    // fighting it, and unwinds to zero instead of being slammed there.
     const spin = { value: 0 };
     const apply = () => setFlavourSpin(spin.value);
 
@@ -80,8 +77,6 @@ export function initFlavour() {
         });
     });
 
-    // Act 4 - horizontal panel scroll. Each panel that reaches centre takes
-    // the whole scene with it.
     const track = document.getElementById('flavour-track');
     const section = document.getElementById('act-flavour');
     if (!track || !section) return;

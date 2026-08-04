@@ -1,5 +1,3 @@
-// Vendored locally: the origin CDN throttles under repeated loads, and a
-// self-contained asset folder is what makes this deployable.
 const BASE = 'assets';
 
 export const ASSETS = {
@@ -35,8 +33,6 @@ export const STAGE = {
     fov: 30,
     distance: 3.8,
     roll: -25 * Math.PI / 180,
-    // The can has to share a phone screen with the whole hero stack, so it
-    // takes a much smaller share of the frame there.
     fill: matchMedia('(max-width: 900px)').matches ? 0.4 : 0.71,
     exposure: 1.15,
     maxDpr: 1.5,

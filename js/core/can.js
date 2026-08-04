@@ -14,16 +14,11 @@ const state = {
     mouseY: 0,
     smoothX: 0,
     smoothY: 0,
-    // Two independent owners: the scroll journey and the flavour switch. They
-    // are summed, never shared - writing one value from both produced a can
-    // that jumped between two rotations every frame.
     scrollSpin: 0,
     flavourSpin: 0,
     bob: true,
 };
 
-// Scroll choreography writes here; mouse tilt and idle bob are composited on
-// top each frame so the two never overwrite each other.
 export const canScroll = {
     x: 0,
     y: 0,
@@ -66,7 +61,6 @@ export async function initCan() {
     const center = box.getCenter(new THREE.Vector3());
     model.position.sub(center);
 
-    // Framing is recomputed on resize, so only the invariants are captured here.
     framed = {
         model,
         maxDim: Math.max(size.x, size.y, size.z),
@@ -103,15 +97,10 @@ export function setFlavorTexture(flavor) {
     if (!tex) return;
     for (const mat of baseMaterials) {
         mat.map = tex;
-        // needsUpdate only matters when the material's shape changes. Both
-        // textures share settings, so forcing it here recompiled the program
-        // mid-scroll for nothing.
         if (!warmedTextures) mat.needsUpdate = true;
     }
 }
 
-// Bind the blue texture once during load so its upload and any program
-// variant happen before the user can reach the flavour act.
 export function warmCanTextures() {
     if (!textures.blue) return;
     for (const mat of baseMaterials) mat.map = textures.blue;

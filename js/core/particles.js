@@ -12,14 +12,12 @@ const ringTargets = new Float32Array(COUNT * 3);
 const seeds = new Float32Array(COUNT);
 
 for (let i = 0; i < COUNT; i++) {
-    // Start: a loose cylinder matching the can's silhouette
     const a = Math.random() * Math.PI * 2;
     const r = 0.28 + Math.random() * 0.1;
     positions[i * 3] = Math.cos(a) * r;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 0.95;
     positions[i * 3 + 2] = Math.sin(a) * r;
 
-    // End: a torus ring - aluminium going round again
     const t = (i / COUNT) * Math.PI * 2;
     const tube = 0.055 + Math.pow(Math.random(), 1.6) * 0.075;
     const phi = Math.random() * Math.PI * 2;
@@ -104,8 +102,6 @@ export function setParticleColor(hex) {
     material.uniforms.uColor.value.setHex(hex);
 }
 
-// The ring lies in XZ. Spun only on Y the camera sees it edge-on, as a line -
-// tilting it forward is what makes it read as a loop.
 points.rotation.x = -0.62;
 
 onFrame((delta, elapsed) => {
