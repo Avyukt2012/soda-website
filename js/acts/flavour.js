@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger } from '../scroll/smooth.js';
+import { gsap, ScrollTrigger, SCRUB } from '../scroll/smooth.js';
 import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
 import { setBackgroundFlavor } from '../core/background.js';
@@ -96,7 +96,7 @@ export function initFlavour() {
             trigger: section,
             start: 'top top',
             end: () => `+=${distance() + window.innerHeight}`,
-            scrub: 1,
+            scrub: SCRUB,
             invalidateOnRefresh: true,
         },
     });

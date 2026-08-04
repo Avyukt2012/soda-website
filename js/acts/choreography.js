@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger } from '../scroll/smooth.js';
+import { gsap, ScrollTrigger, SCRUB } from '../scroll/smooth.js';
 import { canScroll, setSpin } from '../core/can.js';
 import { berryState } from '../core/berries.js';
 import { leafState } from '../core/leaves.js';
@@ -8,7 +8,6 @@ import { ecoState } from '../core/particles.js';
 import { STAGE, isMobile } from '../config.js';
 
 const TAU = Math.PI * 2;
-const SCRUB = 1;
 
 function pin(selector) {
     return {

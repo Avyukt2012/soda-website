@@ -6,9 +6,21 @@ import { isMobile } from '../config.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const params = new URLSearchParams(location.search);
+const num = (key, fallback) => {
+    const v = parseFloat(params.get(key));
+    return Number.isFinite(v) ? v : fallback;
+};
+
+// Lenis smooths the scroll position and ScrollTrigger's scrub smooths the
+// timeline on top of it. Stacked too hard they compound: the can was settling
+// 900ms after the scroll had stopped. lerp is framerate-independent and tighter
+// than the old time-based duration.
+export const LERP = num('lerp', isMobile ? 0.12 : 0.1);
+export const SCRUB = num('scrub', isMobile ? 0.3 : 0.35);
+
 export const lenis = new Lenis({
-    duration: isMobile ? 0.9 : 1.15,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    lerp: LERP,
     smoothWheel: true,
     syncTouch: false,
     touchMultiplier: 1.6,

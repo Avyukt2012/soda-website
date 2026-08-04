@@ -1,4 +1,4 @@
-import { gsap } from '../scroll/smooth.js';
+import { gsap, SCRUB } from '../scroll/smooth.js';
 import DrawSVGPlugin from 'gsap/DrawSVGPlugin';
 
 gsap.registerPlugin(DrawSVGPlugin);
@@ -18,7 +18,7 @@ export function initAnatomy() {
             trigger: section,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 1,
+            scrub: SCRUB,
         },
     });
 
