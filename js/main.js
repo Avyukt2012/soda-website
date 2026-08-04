@@ -10,6 +10,7 @@ import { initBubbles } from './ui/bubbles.js';
 import { createLoader } from './ui/loader.js';
 import { initCursor } from './ui/cursor.js';
 import { initNav } from './ui/nav.js';
+import { initTheme, refreshTheme } from './ui/theme.js';
 import { initAudio, tick } from './ui/audio.js';
 import { ScrollTrigger, lenis } from './scroll/smooth.js';
 import { initChoreography } from './acts/choreography.js';
@@ -84,6 +85,7 @@ async function boot() {
     initMarquee();
     initMagnetic();
     initAudio();
+    initTheme();
 
     lenis.stop();
 
@@ -101,9 +103,9 @@ async function boot() {
     initAnatomy();
     initTextReveals();
 
-    onFlavorChange((flavor) => {
+    onFlavorChange(() => {
         tick(1);
-        setParticleColor(flavor === 'blue' ? 0xd6e4f0 : 0xdfe8ee);
+        refreshTheme();
     });
 
     await nextFrameOrTimeout(250);

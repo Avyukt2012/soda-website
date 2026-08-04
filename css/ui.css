@@ -33,7 +33,7 @@
     font-family: var(--font-nav);
     font-size: 0.8rem;
     letter-spacing: 0.3em;
-    color: var(--accent);
+    color: var(--accent-text);
     font-style: normal;
 }
 
@@ -107,13 +107,14 @@
 
 .cursor__label {
     font-family: var(--font-nav);
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #fff;
     opacity: 0;
     transition: opacity 0.35s ease;
     white-space: nowrap;
+    padding-top: 3.1rem;
 }
 
 .cursor.has-label .cursor__label { opacity: 1; }
@@ -143,7 +144,7 @@
                 border-color 0.45s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-.audio-toggle:hover { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.audio-toggle:hover { color: var(--text-color); border-color: rgba(150, 150, 150, 0.45); }
 
 .audio-toggle__bars {
     display: flex;
@@ -177,4 +178,56 @@
 @media (max-width: 900px) {
     .audio-toggle { right: 50%; transform: translateX(50%); bottom: 1.4rem; }
     .cursor { display: none; }
+}
+
+.theme-toggle {
+    position: fixed;
+    right: 4%;
+    bottom: 5.4rem;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.05rem 0.55rem 0.6rem;
+    border-radius: 100px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--muted-color);
+    font-family: var(--font-nav);
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.45s cubic-bezier(0.33, 1, 0.68, 1),
+                border-color 0.45s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.theme-toggle:hover { color: var(--text-color); border-color: rgba(150, 150, 150, 0.45); }
+
+.theme-toggle__track {
+    width: 30px;
+    height: 16px;
+    border-radius: 100px;
+    background: rgba(128, 128, 128, 0.28);
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.theme-toggle__knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root[data-theme="light"] .theme-toggle__knob { transform: translateX(14px); }
+
+@media (max-width: 900px) {
+    .theme-toggle { right: 50%; transform: translateX(50%); bottom: 4.4rem; }
 }

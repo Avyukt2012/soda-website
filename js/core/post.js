@@ -181,7 +181,7 @@ composer.addPass(new OutputPass());
 export const liquidPass = new ShaderPass(LiquidShader);
 composer.addPass(liquidPass);
 
-const grainPass = new ShaderPass(GrainVignetteShader);
+export const grainPass = new ShaderPass(GrainVignetteShader);
 composer.addPass(grainPass);
 
 export const postState = { fill: 0 };

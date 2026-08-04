@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { scene, camera } from './stage.js';
 import { onFrame } from './loop.js';
-import { FLAVORS } from '../config.js';
+import { FLAVORS, THEME } from '../config.js';
 
 const uniforms = {
-    uInner: { value: new THREE.Color(FLAVORS.classic.inner) },
-    uMid: { value: new THREE.Color(FLAVORS.classic.mid) },
-    uOuter: { value: new THREE.Color(FLAVORS.classic.outer) },
+    uInner: { value: new THREE.Color(FLAVORS.classic.dark.inner) },
+    uMid: { value: new THREE.Color(FLAVORS.classic.dark.mid) },
+    uOuter: { value: new THREE.Color(FLAVORS.classic.dark.outer) },
+    uLift: { value: THEME.dark.bgLift },
     uTime: { value: 0 },
     uAspect: { value: window.innerWidth / window.innerHeight },
 };
@@ -29,6 +30,7 @@ const material = new THREE.ShaderMaterial({
         uniform vec3 uOuter;
         uniform float uTime;
         uniform float uAspect;
+        uniform float uLift;
         varying vec2 vUv;
 
         void main() {
@@ -44,7 +46,7 @@ const material = new THREE.ShaderMaterial({
 
             // ACESFilmic pulls midtones down; pre-lift so the gradient reads
             // at the same weight it did as a CSS background.
-            col *= 1.45;
+            col *= uLift;
 
             gl_FragColor = vec4(col, 1.0);
         }`,
@@ -70,17 +72,34 @@ holder.add(quad);
 fit();
 window.addEventListener('resize', fit);
 
+let activeTheme = 'dark';
+
+function applyPalette(flavor, theme, gsapRef, duration) {
+    const entry = FLAVORS[flavor] || FLAVORS.classic;
+    const target = entry[theme] || entry.dark;
+    const lift = THEME[theme].bgLift;
+
+    const set = (uniform, hex) => {
+        const c = new THREE.Color(hex);
+        if (!gsapRef) { uniform.value.copy(c); return; }
+        gsapRef.to(uniform.value, { r: c.r, g: c.g, b: c.b, duration, ease: 'power2.inOut' });
+    };
+
+    set(uniforms.uInner, target.inner);
+    set(uniforms.uMid, target.mid);
+    set(uniforms.uOuter, target.outer);
+
+    if (!gsapRef) uniforms.uLift.value = lift;
+    else gsapRef.to(uniforms.uLift, { value: lift, duration, ease: 'power2.inOut' });
+}
+
 export function setBackgroundFlavor(flavor, duration = 1.2, gsapRef = null) {
-    const target = FLAVORS[flavor] || FLAVORS.classic;
-    if (!gsapRef) {
-        uniforms.uInner.value.set(target.inner);
-        uniforms.uMid.value.set(target.mid);
-        uniforms.uOuter.value.set(target.outer);
-        return;
-    }
-    gsapRef.to(uniforms.uInner.value, { ...new THREE.Color(target.inner), duration, ease: 'power2.inOut' });
-    gsapRef.to(uniforms.uMid.value, { ...new THREE.Color(target.mid), duration, ease: 'power2.inOut' });
-    gsapRef.to(uniforms.uOuter.value, { ...new THREE.Color(target.outer), duration, ease: 'power2.inOut' });
+    applyPalette(flavor, activeTheme, gsapRef, duration);
+}
+
+export function applyThemeToBackground(flavor, theme, gsapRef = null) {
+    activeTheme = theme;
+    applyPalette(flavor, theme, gsapRef, 0.9);
 }
 
 export const backgroundUniforms = uniforms;

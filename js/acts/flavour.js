@@ -2,7 +2,7 @@ import { gsap, ScrollTrigger, SCRUB } from '../scroll/smooth.js';
 import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
 import { setBackgroundFlavor } from '../core/background.js';
-import { setLiquidColor } from '../core/post.js';
+import { liquidPass } from '../core/post.js';
 import { FLAVORS, isMobile } from '../config.js';
 
 const ORDER = ['classic', 'blue'];
@@ -23,7 +23,7 @@ export function applyFlavor(flavor, { instant = false } = {}) {
     });
 
     setBackgroundFlavor(flavor, instant ? 0 : 1.25, instant ? null : gsap);
-    setLiquidColor(FLAVORS[flavor].tint);
+
     listeners.forEach((fn) => fn(flavor));
 
     const swap = () => {

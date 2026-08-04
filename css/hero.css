@@ -50,7 +50,7 @@
 
 .contact-btn {
     background: rgba(0, 0, 0, 0.5);
-    color: white;
+    color: #ffffff;
     border: none;
     padding: 0.9rem 2rem;
     border-radius: 100px;
@@ -93,7 +93,7 @@
     line-height: 0.8;
     font-weight: 400;
     white-space: nowrap;
-    color: white;
+    color: var(--text-color);
 }
 
 .hero-left {
@@ -116,7 +116,7 @@
     align-items: center;
     gap: 1.5rem;
     background: rgba(0, 0, 0, 0.5);
-    color: white;
+    color: #ffffff;
     border: none;
     padding: 0.4rem 0.4rem 0.4rem 1.5rem;
     border-radius: 100px;
@@ -247,7 +247,7 @@
 .nav-arrow {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    color: white;
+    color: var(--text-color);
     width: 36px;
     height: 36px;
     border-radius: 50%;

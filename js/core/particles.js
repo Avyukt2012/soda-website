@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { scene } from './stage.js';
 import { onFrame } from './loop.js';
-import { isMobile } from '../config.js';
+import { isMobile, FLAVORS } from '../config.js';
 
 const COUNT = isMobile ? 700 : 1600;
 
@@ -98,8 +98,21 @@ export function warmParticles() {
     points.visible = true;
 }
 
-export function setParticleColor(hex) {
-    material.uniforms.uColor.value.setHex(hex);
+export function setParticleColor(hexOrKey) {
+    if (typeof hexOrKey === 'number') {
+        material.uniforms.uColor.value.setHex(hexOrKey);
+        return;
+    }
+    material.uniforms.uColor.value.setHex(currentPalette[hexOrKey] ?? currentPalette.particle);
+}
+
+let currentPalette = FLAVORS.classic;
+
+export function setParticlePalette(flavor, theme) {
+    currentPalette = FLAVORS[flavor] || FLAVORS.classic;
+    material.uniforms.uColor.value.setHex(
+        theme === 'light' ? currentPalette.particleLight : currentPalette.particle
+    );
 }
 
 points.rotation.x = -0.62;
