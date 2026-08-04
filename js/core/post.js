@@ -115,12 +115,13 @@ const LiquidShader = {
             // in by a Fresnel-ish term. This is what actually sells water.
             float mirrorY = 2.0 * surface - uv.y;
             vec3 refl = texture2D(tDiffuse, vec2(uv.x + ripple * 1.6, clamp(mirrorY, 0.0, 1.0))).rgb;
-            float fres = pow(1.0 - clamp(depth * 3.2, 0.0, 1.0), 2.5);
+            // Tight falloff: reflection belongs to the waterline, not the whole body.
+            float fres = pow(1.0 - clamp(depth * 9.0, 0.0, 1.0), 3.0);
 
             // Tinted, absorbing body
             vec3 liquid = mix(refr, refr * uColor * 1.9, 0.3 + depth * 0.34);
             liquid *= mix(1.0, 0.74, depth);
-            liquid = mix(liquid, refl * mix(vec3(1.0), uColor * 1.6, 0.5), fres * 0.32);
+            liquid = mix(liquid, refl * mix(vec3(1.0), uColor * 1.6, 0.6), fres * 0.24);
             liquid += uColor * depth * 0.07;
 
             liquid += bubbles(uv, uTime) * inside * (1.0 - depth * 0.35);
