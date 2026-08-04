@@ -46,6 +46,15 @@ const TEXTURE_SLOTS = [
     'aoMap', 'emissiveMap', 'alphaMap',
 ];
 
+function nextFrameOrTimeout(ms) {
+    return new Promise((resolve) => {
+        let settled = false;
+        const done = () => { if (!settled) { settled = true; resolve(); } };
+        requestAnimationFrame(done);
+        setTimeout(done, ms);
+    });
+}
+
 function primeTextures() {
     const seen = new Set();
     scene.traverse((node) => {
@@ -100,7 +109,9 @@ async function boot() {
 
     // Let one real frame run so every instanceMatrix holds live transforms
     // before the warm draw; warming against zeroed matrices uploads nothing.
-    await new Promise((r) => requestAnimationFrame(r));
+    // Raced against a timer: a page opened in a background tab gets no rAF at
+    // all, and boot must never hang waiting for one.
+    await nextFrameOrTimeout(250);
 
     // Precompile every material in the scene with both flavours' assets bound
     // and visible. A hand-rolled warm draw missed program variants that only
@@ -110,9 +121,12 @@ async function boot() {
     warmParticles();
     warmCanTextures();
     try {
-        await renderer.compileAsync(scene, camera);
+        await Promise.race([
+            renderer.compileAsync(scene, camera),
+            new Promise((r) => setTimeout(r, 4000)),
+        ]);
     } catch {
-        renderer.compile(scene, camera);
+        try { renderer.compile(scene, camera); } catch { /* non-fatal */ }
     }
 
     // compileAsync builds programs but does not upload textures - those are
