@@ -79,9 +79,17 @@ body.is-ready #gl {
     }
 }
 
+/* The mask needs to clip vertically for the reveal, but Galada is cursive and
+   its glyphs overhang their advance width by ~0.05em, so a purely tight box
+   shaves the last letter. Pad horizontally and cancel it with negative margin
+   so the clip boundary moves out without shifting layout. */
 .split-line {
     overflow: hidden;
-    padding-bottom: 0.06em;
+    padding-bottom: 0.08em;
+    padding-left: 0.14em;
+    padding-right: 0.14em;
+    margin-left: -0.14em;
+    margin-right: -0.14em;
 }
 
 #perf {

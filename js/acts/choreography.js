@@ -60,8 +60,9 @@ export function initChoreography() {
         .to(canScroll, { x: 0, y: 0.22, roll: -0.5, scale: 0.62, bobAmount: 1, ease: 'power2.inOut' }, 4)
         .to(spin, { value: TAU * 3.4, ease: 'power2.inOut', onUpdate: applySpin }, 4)
 
-        // Eco -> Footer: can settles small and centred behind the wordmark.
-        .to(canScroll, { y: -0.05, roll: -0.25, scale: 0.52, ease: 'power2.out' }, 5)
+        // Eco -> Footer: can settles above the wordmark. Sits high and small
+        // so it clears the type on tall viewports, not just 16:9.
+        .to(canScroll, { y: 0.62, roll: -0.25, scale: 0.4, ease: 'power2.out' }, 5)
         .to(spin, { value: TAU * 3.75, ease: 'power2.out', onUpdate: applySpin }, 5)
         .to(camera.position, { z: STAGE.distance * 1.08, ease: 'power2.out' }, 5);
 
