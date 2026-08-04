@@ -34,34 +34,43 @@ export function initChoreography() {
         defaults: { duration: 1, ease: 'power2.inOut' },
     });
 
+    const step = isMobile
+        ? [
+            { x: 0,  y: -0.16, z: -0.45, roll: -0.30, pitch: 0.04, scale: 0.82, bob: 0.7,  spin: 0.6  },
+            { x: 0,  y: 0.34,  z: -0.15, roll: 0.05,  pitch: 0.06, scale: 0.58, bob: 0.35, spin: 1.15 },
+            { x: 0,  y: -0.05, z: -0.55, roll: -0.5,  pitch: 0.1,  scale: 0.92, bob: 0.18, spin: 1.62 },
+            { x: 0,  y: 0.30,  z: -0.1,  roll: -0.22, pitch: 0,    scale: 0.6,  bob: 0.5,  spin: 2.1  },
+            { x: 0,  y: 0.12,  z: -0.3,  roll: -0.4,  pitch: 0,    scale: 0.5,  bob: 1,    spin: 2.75 },
+            { x: 0,  y: 0.46,  z: 0,     roll: -0.2,  pitch: 0,    scale: 0.36, bob: 1,    spin: 3.1  },
+        ]
+        : [
+            { x: -0.42, y: 0,     z: -0.3,  roll: -0.2,  pitch: 0,    scale: 0.94, bob: 0.65, spin: 0.6  },
+            { x: 0.5,   y: 0.04,  z: 0,     roll: 0,     pitch: 0.05, scale: 0.86, bob: 0.65, spin: 1.15 },
+            { x: 0,     y: -0.14, z: -0.22, roll: -0.55, pitch: 0.1,  scale: 0.96, bob: 0.18, spin: 1.62 },
+            { x: -0.12, y: 0.02,  z: 0,     roll: -0.28, pitch: 0,    scale: 0.9,  bob: 0.5,  spin: 2.1  },
+            { x: 0,     y: 0.2,   z: -0.18, roll: -0.46, pitch: 0,    scale: 0.62, bob: 1,    spin: 2.75 },
+            { x: 0,     y: 0.5,   z: 0,     roll: -0.24, pitch: 0,    scale: 0.42, bob: 1,    spin: 3.1  },
+        ];
+
+    const zoom = isMobile
+        ? [0.95, 1.02, 0.9, 1.05, 1.05, 1.1]
+        : [0.88, 0.95, 0.84, 1, 1, 1.06];
+
+    step.forEach((k, i) => {
+        journey
+            .to(canScroll, {
+                x: k.x, y: k.y, z: k.z,
+                roll: k.roll, pitch: k.pitch,
+                scale: k.scale, bobAmount: k.bob,
+            }, i)
+            .to(spin, { value: TAU * k.spin, onUpdate: applySpin }, i)
+            .to(camera.position, { z: STAGE.distance * zoom[i] }, i);
+    });
+
     journey
-        .to(canScroll, { x: isMobile ? 0 : -0.42, z: -0.3, scale: 0.94, roll: -0.2, bobAmount: 0.65 }, 0)
-        .to(spin, { value: TAU * 0.6, onUpdate: applySpin }, 0)
-        .to(camera.position, { z: STAGE.distance * 0.88 }, 0)
-
-        .to(canScroll, { x: isMobile ? 0 : 0.5, z: 0, y: 0.04, roll: 0, pitch: 0.05, scale: 0.86 }, 1)
-        .to(spin, { value: TAU * 1.15, onUpdate: applySpin }, 1)
-        .to(camera.position, { z: STAGE.distance * 0.95 }, 1)
-
-        .to(canScroll, { x: 0, z: -0.22, y: -0.14, roll: -0.55, pitch: 0.1, scale: 0.96, bobAmount: 0.18 }, 2)
-        .to(spin, { value: TAU * 1.62, onUpdate: applySpin }, 2)
-        .to(camera.position, { z: STAGE.distance * 0.84 }, 2)
-
-        .to(canScroll, { x: isMobile ? 0 : -0.12, z: 0, y: 0.02, roll: -0.28, pitch: 0, scale: 0.9, bobAmount: 0.5 }, 3)
-        .to(spin, { value: TAU * 2.1, onUpdate: applySpin }, 3)
-        .to(camera.position, { z: STAGE.distance }, 3)
-
-        .to(canScroll, { x: 0, z: -0.18, y: 0.2, roll: -0.46, scale: 0.62, bobAmount: 1 }, 4)
-        .to(spin, { value: TAU * 2.75, onUpdate: applySpin }, 4)
-
-        .to(canScroll, { z: 0, y: 0.5, roll: -0.24, scale: 0.42 }, 5)
-        .to(spin, { value: TAU * 3.1, onUpdate: applySpin }, 5)
-        .to(camera.position, { z: STAGE.distance * 1.06 }, 5);
-
-    journey
-        .to(berryState, { capture: 1, repel: 0.55 }, 0)
-        .to(berryState, { explode: 1, capture: 0.25 }, 1)
-        .to(berryState, { explode: 0, capture: 1, spread: 0.8 }, 2)
+        .to(berryState, { capture: 1, repel: isMobile ? 0 : 0.55, spread: isMobile ? 0.72 : 1 }, 0)
+        .to(berryState, { explode: 1, capture: 0.25, spread: isMobile ? 0.6 : 1 }, 1)
+        .to(berryState, { explode: 0, capture: 1, spread: isMobile ? 0.55 : 0.8 }, 2)
         .to(berryState, { capture: 1, spread: 0.62 }, 3)
         .to(berryState, { dissolve: 1, opacity: 0.15 }, 4)
         .to(berryState, { dissolve: 0.82, opacity: 0.35 }, 5)

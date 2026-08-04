@@ -29,6 +29,7 @@ const LiquidShader = {
         uFill: { value: 0 },
         uColor: { value: new THREE.Color(0x10b981) },
         uAspect: { value: window.innerWidth / window.innerHeight },
+        uSpan: { value: isMobile ? 1.3 : 1.14 },
     },
     vertexShader: `
         varying vec2 vUv;
@@ -43,13 +44,14 @@ const LiquidShader = {
         uniform float uFill;
         uniform vec3 uColor;
         uniform float uAspect;
+        uniform float uSpan;
         varying vec2 vUv;
         ${NOISE}
 
         // Two low frequencies only. Heavy fbm on the surface is what turned
         // the waterline into a fog bank.
         float surfaceAt(float x) {
-            float s = uFill * 1.14 - 0.07;
+            float s = uFill * uSpan - 0.07;
             s += sin(x * 4.3 - uTime * 0.45) * 0.013;
             s += sin(x * 9.7 + uTime * 0.78) * 0.006;
             s += (noise(vec2(x * 2.1, uTime * 0.13)) - 0.5) * 0.022;

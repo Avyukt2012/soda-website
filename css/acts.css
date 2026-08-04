@@ -292,6 +292,8 @@
 
     .act__pin { padding: 0 7%; align-items: flex-start; padding-top: 16vh; }
 
+    .act--reviews .act__pin { align-items: center; padding-top: 0; }
+
     .act-title { font-size: clamp(2.8rem, 13vw, 4.2rem); white-space: normal; }
     .act-lede { font-size: 0.95rem; margin-top: 1.1rem; }
     .eyebrow { font-size: 0.62rem; margin-bottom: 1rem; }
@@ -312,14 +314,24 @@
     .anatomy-label__name { font-size: 0.78rem; }
     .anatomy-label__note { font-size: 0.62rem; }
 
-    .flavour-panel { padding: 0 7%; }
+    /* Copy drops to the lower third so the can owns the top of the frame
+       instead of the two fighting for the middle. */
+    .flavour-panel {
+        padding: 0 7% 22vh;
+        justify-content: flex-end;
+    }
     .flavour-panel__name { font-size: clamp(2.8rem, 14vw, 4.5rem); }
     .flavour-panel__notes { flex-direction: column; gap: 0.4rem; font-size: 0.72rem; }
 
-    .marquee__item { font-size: clamp(1.8rem, 8vw, 2.6rem); }
-    .footer-title { font-size: clamp(3rem, 17vw, 5rem); }
-    .footer-meta { flex-direction: column; gap: 0.5rem; font-size: 0.68rem; }
-    .footer-inner { gap: 1.4rem; }
+    .marquee { gap: 1.4rem; }
+    .marquee__item { font-size: clamp(1.6rem, 9vw, 2.4rem); }
+
+    .act--footer .act__pin { align-items: center; padding-top: 0; padding-bottom: 9rem; }
+    .footer-title { font-size: clamp(2.8rem, 16vw, 4.4rem); }
+    .footer-meta { flex-direction: column; gap: 0.4rem; font-size: 0.62rem; }
+    .footer-inner { gap: 1.1rem; }
+    .magnetic { padding: 0.9rem 0.9rem 0.9rem 1.7rem; font-size: 0.82rem; }
+    .magnetic__dot { width: 28px; height: 28px; font-size: 0.95rem; }
 
     .scroll-cue { display: none; }
 }

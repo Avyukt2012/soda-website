@@ -115,7 +115,8 @@ export function setParticlePalette(flavor, theme) {
     );
 }
 
-points.rotation.x = -0.62;
+points.rotation.x = isMobile ? -0.34 : -0.62;
+points.scale.setScalar(isMobile ? 0.72 : 1);
 
 onFrame((delta, elapsed) => {
     material.uniforms.uTime.value = elapsed;
@@ -123,5 +124,5 @@ onFrame((delta, elapsed) => {
     material.uniforms.uOpacity.value = ecoState.opacity;
     points.visible = ecoState.opacity > 0.01;
     points.rotation.y = elapsed * 0.16;
-    points.rotation.x = -0.62 + Math.sin(elapsed * 0.25) * 0.06;
+    points.rotation.x = (isMobile ? -0.34 : -0.62) + Math.sin(elapsed * 0.25) * 0.06;
 });

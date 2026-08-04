@@ -176,7 +176,8 @@
 }
 
 @media (max-width: 900px) {
-    .audio-toggle { right: 50%; transform: translateX(50%); bottom: 1.4rem; }
+    /* One row of small pills, clear of the footer CTA, instead of two stacked
+       controls landing on top of the content. */
     .cursor { display: none; }
 }
 
@@ -228,6 +229,36 @@
 
 :root[data-theme="light"] .theme-toggle__knob { transform: translateX(14px); }
 
+
+
+
+/* Placed after the base control styles so these actually win - declared inside
+   the earlier media block they were overridden by the base rules below it. */
 @media (max-width: 900px) {
-    .theme-toggle { right: 50%; transform: translateX(50%); bottom: 4.4rem; }
+    .audio-toggle,
+    .theme-toggle {
+        bottom: 1.1rem;
+        width: auto;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.54rem;
+        letter-spacing: 0.18em;
+        gap: 0.5rem;
+    }
+
+    .audio-toggle {
+        right: 4%;
+        left: auto;
+        transform: none;
+    }
+
+    .theme-toggle {
+        left: 4%;
+        right: auto;
+        transform: none;
+        padding-left: 0.45rem;
+    }
+
+    .theme-toggle__track { width: 26px; height: 14px; }
+    .theme-toggle__knob { width: 10px; height: 10px; }
+    :root[data-theme="light"] .theme-toggle__knob { transform: translateX(12px); }
 }

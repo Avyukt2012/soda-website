@@ -297,7 +297,7 @@
     .hero-content {
         flex-direction: column;
         justify-content: space-between;
-        padding-bottom: 5.5rem;
+        padding-bottom: 7.5rem;
     }
 
     .hero-left {
@@ -321,7 +321,11 @@
     .primary-btn { font-size: 0.85rem; padding: 0.35rem 0.35rem 0.35rem 1.2rem; }
     .plus-icon { width: 32px; height: 32px; font-size: 1.2rem; }
 
-    .hero-right { gap: 1.25rem; }
+    .hero-right { gap: 1.25rem; justify-content: flex-end; }
+
+    /* Portrait cannot carry two display headlines. The main title leads and
+       the side title is dropped rather than shrunk into illegibility. */
+    .side-title { display: none; }
 
     .card {
         width: 104px;
