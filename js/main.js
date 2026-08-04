@@ -2,7 +2,7 @@ import { renderer } from './core/stage.js';
 import './core/background.js';
 import { renderPost, postState, liquidPass } from './core/post.js';
 import { onFrame, start } from './core/loop.js';
-import { initCan, canScroll, warmCanTextures, settleCanTexture } from './core/can.js';
+import { initCan, canScroll, canPivot, warmCanTextures, settleCanTexture } from './core/can.js';
 import { initBerries, warmBerries, settleBerries } from './core/berries.js';
 import { initLeaves } from './core/leaves.js';
 import { setParticleColor, warmParticles } from './core/particles.js';
@@ -88,6 +88,7 @@ async function boot() {
     if (new URLSearchParams(location.search).has('debug')) {
         window.__can = canScroll;
         window.__post = postState;
+        window.__rotY = () => canPivot.rotation.y;
     }
 
     document.body.classList.add('is-ready');

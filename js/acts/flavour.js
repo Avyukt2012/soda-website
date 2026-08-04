@@ -1,5 +1,5 @@
 import { gsap, ScrollTrigger } from '../scroll/smooth.js';
-import { setFlavorTexture, setSpin, canScroll } from '../core/can.js';
+import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
 import { setBackgroundFlavor } from '../core/background.js';
 import { setLiquidColor } from '../core/post.js';
@@ -14,7 +14,7 @@ export function onFlavorChange(fn) { listeners.add(fn); }
 
 export function getFlavor() { return current; }
 
-export function applyFlavor(flavor, { instant = false } = {}) {
+export function applyFlavor(flavor, { instant = false, spin: doSpin = true } = {}) {
     if (!FLAVORS[flavor] || flavor === current) return;
     current = flavor;
 
@@ -26,35 +26,53 @@ export function applyFlavor(flavor, { instant = false } = {}) {
     setLiquidColor(FLAVORS[flavor].tint);
     listeners.forEach((fn) => fn(flavor));
 
-    if (instant) {
+    const swap = () => {
         setFlavorTexture(flavor);
         setBerryFlavor(flavor);
+    };
+
+    if (instant) {
+        swap();
         return;
     }
 
-    // Spin the can and swap the label at the peak, so the change is hidden by
-    // the fastest part of the rotation.
-    if (switching) return;
+    if (switching) {
+        swap();
+        return;
+    }
     switching = true;
 
+    // Scroll-driven changes get no spin of their own. The journey is already
+    // rotating the can, and layering a second rotation on top is what made
+    // this read as choppy. A brief punch masks the swap instead.
+    if (!doSpin) {
+        gsap.timeline({ onComplete: () => { switching = false; } })
+            .to(canScroll, { punch: 1.07, duration: 0.28, ease: 'power2.out', onComplete: swap })
+            .to(canScroll, { punch: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' });
+        return;
+    }
+
+    // Click-driven: a full turn, swapped at the fastest part of the rotation.
+    // Runs on its own channel so it sums with the journey rather than
+    // fighting it, and unwinds to zero instead of being slammed there.
     const spin = { value: 0 };
-    gsap.timeline({ onComplete: () => { switching = false; setSpin(0); } })
+    const apply = () => setFlavourSpin(spin.value);
+
+    gsap.timeline({ onComplete: () => { switching = false; } })
+        .to(spin, {
+            value: Math.PI,
+            duration: 0.5,
+            ease: 'power2.in',
+            onUpdate: apply,
+            onComplete: swap,
+        })
         .to(spin, {
             value: Math.PI * 2,
-            duration: 0.55,
-            ease: 'power2.in',
-            onUpdate: () => setSpin(spin.value),
-            onComplete: () => {
-                setFlavorTexture(flavor);
-                setBerryFlavor(flavor);
-            },
+            duration: 1.15,
+            ease: 'power2.out',
+            onUpdate: apply,
         })
-        .to(spin, {
-            value: Math.PI * 4,
-            duration: 1.25,
-            ease: 'back.out(0.7)',
-            onUpdate: () => setSpin(spin.value),
-        })
+        .set(spin, { value: 0, onComplete: apply })
         .to(canScroll, { punch: 1.06, duration: 0.4, ease: 'power2.out' }, 0)
         .to(canScroll, { punch: 1, duration: 1.2, ease: 'elastic.out(1, 0.6)' }, 0.4);
 }
@@ -99,8 +117,8 @@ export function initFlavour() {
             containerAnimation: trackTween,
             start: 'left center',
             end: 'right center',
-            onEnter: () => applyFlavor(panel.dataset.flavour),
-            onEnterBack: () => applyFlavor(panel.dataset.flavour),
+            onEnter: () => applyFlavor(panel.dataset.flavour, { spin: false }),
+            onEnterBack: () => applyFlavor(panel.dataset.flavour, { spin: false }),
         });
     });
 

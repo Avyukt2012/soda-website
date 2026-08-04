@@ -14,7 +14,11 @@ const state = {
     mouseY: 0,
     smoothX: 0,
     smoothY: 0,
-    spin: 0,
+    // Two independent owners: the scroll journey and the flavour switch. They
+    // are summed, never shared - writing one value from both produced a can
+    // that jumped between two rotations every frame.
+    scrollSpin: 0,
+    flavourSpin: 0,
     bob: true,
 };
 
@@ -118,7 +122,11 @@ export function settleCanTexture() {
 }
 
 export function setSpin(radians) {
-    state.spin = radians;
+    state.scrollSpin = radians;
+}
+
+export function setFlavourSpin(radians) {
+    state.flavourSpin = radians;
 }
 
 window.addEventListener('mousemove', (e) => {
@@ -130,7 +138,8 @@ onFrame((delta, elapsed) => {
     state.smoothX = damp(state.smoothX, state.mouseX, MOTION.mouseEase, delta);
     state.smoothY = damp(state.smoothY, state.mouseY, MOTION.mouseEase, delta);
 
-    canPivot.rotation.y = state.smoothX * MOTION.orbitAzimuth + state.spin;
+    canPivot.rotation.y = state.smoothX * MOTION.orbitAzimuth
+        + state.scrollSpin + state.flavourSpin;
     canPivot.rotation.x = state.smoothY * MOTION.orbitPolar + canScroll.pitch;
 
     const phase = (elapsed / MOTION.bobPeriod) * Math.PI * 2;
