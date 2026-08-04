@@ -112,6 +112,18 @@ export async function initBerries() {
     }
 }
 
+// Both models must reach the GPU during load. Otherwise the first flavour
+// switch uploads blueberry geometry mid-scroll and drops a frame.
+export function warmBerries() {
+    sets.cherry.forEach((m) => { m.visible = true; });
+    sets.blueberry.forEach((m) => { m.visible = true; });
+}
+
+export function settleBerries() {
+    sets.cherry.forEach((m) => { m.visible = active === 'cherry'; });
+    sets.blueberry.forEach((m) => { m.visible = active === 'blueberry'; });
+}
+
 export function setBerryFlavor(flavor) {
     const key = flavor === 'blue' ? 'blueberry' : 'cherry';
     if (key === active) return;

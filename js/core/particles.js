@@ -96,6 +96,10 @@ points.frustumCulled = false;
 points.visible = false;
 scene.add(points);
 
+export function warmParticles() {
+    points.visible = true;
+}
+
 export function setParticleColor(hex) {
     material.uniforms.uColor.value.setHex(hex);
 }

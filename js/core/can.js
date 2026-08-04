@@ -27,12 +27,29 @@ export const canScroll = {
     roll: STAGE.roll,
     pitch: 0,
     scale: 1,
+    punch: 1,
     bobAmount: 1,
     opacity: 1,
 };
 
 let baseMaterials = [];
 let allMaterials = [];
+let framed = null;
+let warmedTextures = false;
+
+function currentFill() {
+    return matchMedia('(max-width: 900px)').matches ? 0.4 : 0.71;
+}
+
+function applyFraming() {
+    if (!framed) return;
+    const visibleHeight = 2 * STAGE.distance * Math.tan((STAGE.fov * Math.PI / 180) / 2);
+    const rollSpread = Math.cos(-STAGE.roll) + framed.aspect * Math.sin(-STAGE.roll);
+    framed.model.scale.setScalar((currentFill() * visibleHeight / rollSpread) / framed.maxDim);
+}
+
+window.addEventListener('resize', applyFraming);
+
 const textures = {};
 
 export async function initCan() {
@@ -44,14 +61,13 @@ export async function initCan() {
     const center = box.getCenter(new THREE.Vector3());
     model.position.sub(center);
 
-    // Frame to a fixed fraction of viewport height, accounting for the 25deg roll
-    // which widens the can's projected vertical extent.
-    const visibleHeight = 2 * STAGE.distance * Math.tan((STAGE.fov * Math.PI / 180) / 2);
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const aspect = Math.max(size.x, size.z) / size.y;
-    const rollSpread = Math.cos(-STAGE.roll) + aspect * Math.sin(-STAGE.roll);
-    const scale = (STAGE.fill * visibleHeight / rollSpread) / maxDim;
-    model.scale.setScalar(scale);
+    // Framing is recomputed on resize, so only the invariants are captured here.
+    framed = {
+        model,
+        maxDim: Math.max(size.x, size.y, size.z),
+        aspect: Math.max(size.x, size.z) / size.y,
+    };
+    applyFraming();
 
     canPivot.add(model);
     canRig.rotation.z = STAGE.roll;
@@ -72,6 +88,7 @@ export async function initCan() {
         mat.map = green;
         mat.needsUpdate = true;
     }
+    warmedTextures = true;
 
     return model;
 }
@@ -81,8 +98,23 @@ export function setFlavorTexture(flavor) {
     if (!tex) return;
     for (const mat of baseMaterials) {
         mat.map = tex;
-        mat.needsUpdate = true;
+        // needsUpdate only matters when the material's shape changes. Both
+        // textures share settings, so forcing it here recompiled the program
+        // mid-scroll for nothing.
+        if (!warmedTextures) mat.needsUpdate = true;
     }
+}
+
+// Bind the blue texture once during load so its upload and any program
+// variant happen before the user can reach the flavour act.
+export function warmCanTextures() {
+    if (!textures.blue) return;
+    for (const mat of baseMaterials) mat.map = textures.blue;
+}
+
+export function settleCanTexture() {
+    if (!textures.classic) return;
+    for (const mat of baseMaterials) mat.map = textures.classic;
 }
 
 export function setSpin(radians) {
@@ -106,7 +138,7 @@ onFrame((delta, elapsed) => {
 
     canRig.position.set(canScroll.x, canScroll.y + bob, canScroll.z);
     canRig.rotation.z = canScroll.roll;
-    canRig.scale.setScalar(canScroll.scale);
+    canRig.scale.setScalar(canScroll.scale * canScroll.punch);
 
     for (const mat of allMaterials) mat.opacity = canScroll.opacity;
     canRig.visible = canScroll.opacity > 0.01;

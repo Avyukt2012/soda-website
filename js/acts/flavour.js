@@ -55,8 +55,8 @@ export function applyFlavor(flavor, { instant = false } = {}) {
             ease: 'back.out(0.7)',
             onUpdate: () => setSpin(spin.value),
         })
-        .to(canScroll, { scale: canScroll.scale * 1.05, duration: 0.4, ease: 'power2.out' }, 0)
-        .to(canScroll, { scale: canScroll.scale, duration: 1.2, ease: 'elastic.out(1, 0.6)' }, 0.4);
+        .to(canScroll, { punch: 1.06, duration: 0.4, ease: 'power2.out' }, 0)
+        .to(canScroll, { punch: 1, duration: 1.2, ease: 'elastic.out(1, 0.6)' }, 0.4);
 }
 
 export function initFlavour() {
@@ -81,7 +81,7 @@ export function initFlavour() {
     const panels = track.querySelectorAll('.flavour-panel');
     const distance = () => track.scrollWidth - window.innerWidth;
 
-    gsap.to(track, {
+    const trackTween = gsap.to(track, {
         x: () => -distance(),
         ease: 'none',
         scrollTrigger: {
@@ -96,7 +96,7 @@ export function initFlavour() {
     panels.forEach((panel) => {
         ScrollTrigger.create({
             trigger: panel,
-            containerAnimation: gsap.getTweensOf(track)[0],
+            containerAnimation: trackTween,
             start: 'left center',
             end: 'right center',
             onEnter: () => applyFlavor(panel.dataset.flavour),

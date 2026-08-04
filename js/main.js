@@ -1,11 +1,11 @@
 import { renderer } from './core/stage.js';
 import './core/background.js';
-import { renderPost } from './core/post.js';
+import { renderPost, postState, liquidPass } from './core/post.js';
 import { onFrame, start } from './core/loop.js';
-import { initCan } from './core/can.js';
-import { initBerries } from './core/berries.js';
+import { initCan, canScroll, warmCanTextures, settleCanTexture } from './core/can.js';
+import { initBerries, warmBerries, settleBerries } from './core/berries.js';
 import { initLeaves } from './core/leaves.js';
-import { setParticleColor } from './core/particles.js';
+import { setParticleColor, warmParticles } from './core/particles.js';
 import { initBubbles } from './ui/bubbles.js';
 import { createLoader } from './ui/loader.js';
 import { initCursor } from './ui/cursor.js';
@@ -72,6 +72,23 @@ async function boot() {
         tick(1);
         setParticleColor(flavor === 'blue' ? 0xbfdbfe : 0xfbcfe8);
     });
+
+    // Force one frame through the liquid branch so its shader variant is
+    // compiled before the user ever reaches the pour, instead of stalling a
+    // frame mid-scroll.
+    postState.fill = 0.001;
+    warmBerries();
+    warmParticles();
+    warmCanTextures();
+    renderPost();
+    postState.fill = 0;
+    settleBerries();
+    settleCanTexture();
+
+    if (new URLSearchParams(location.search).has('debug')) {
+        window.__can = canScroll;
+        window.__post = postState;
+    }
 
     document.body.classList.add('is-ready');
     ScrollTrigger.refresh();

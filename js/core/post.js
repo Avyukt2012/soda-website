@@ -202,7 +202,16 @@ function sizeComposer() {
     bloomPass.resolution.set(window.innerWidth, window.innerHeight);
 }
 sizeComposer();
-window.addEventListener('resize', sizeComposer);
+
+// Reallocating the composer's render targets and the bloom mip chain is the
+// expensive part of a resize. Coalesce it so dragging a window edge does not
+// realloc every frame.
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+    liquidPass.uniforms.uAspect.value = window.innerWidth / window.innerHeight;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(sizeComposer, 140);
+});
 
 onFrame((delta, elapsed) => {
     liquidPass.uniforms.uTime.value = elapsed;
