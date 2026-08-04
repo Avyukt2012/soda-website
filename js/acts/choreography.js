@@ -30,6 +30,12 @@ export function initChoreography() {
     //
     // Every tween is duration 1 at an integer position, so each segment ends
     // exactly where the next begins - no dead gaps where the can freezes.
+    //
+    // The easing matters as much as the timing. Linear kept position
+    // continuous but let velocity flip sign instantly at each join, so the can
+    // snapped from travelling right to travelling left with no slow-down.
+    // power2.inOut brings velocity to zero at every boundary: the can settles
+    // into an act and accelerates out of it.
     const journey = gsap.timeline({
         scrollTrigger: {
             trigger: document.body,
@@ -37,36 +43,36 @@ export function initChoreography() {
             end: 'bottom bottom',
             scrub: SCRUB,
         },
-        defaults: { duration: 1, ease: 'none' },
+        defaults: { duration: 1, ease: 'power2.inOut' },
     });
 
     // 0 -> 1  Hero into the handoff: drifts left, one slow turn.
     journey
-        .to(canScroll, { x: isMobile ? 0 : -0.5, scale: 0.94, roll: -0.2, bobAmount: 0.65 }, 0)
+        .to(canScroll, { x: isMobile ? 0 : -0.42, z: -0.3, scale: 0.94, roll: -0.2, bobAmount: 0.65 }, 0)
         .to(spin, { value: TAU * 0.6, onUpdate: applySpin }, 0)
         .to(camera.position, { z: STAGE.distance * 0.88 }, 0)
 
         // 1 -> 2  Anatomy: stands upright on the right for inspection.
-        .to(canScroll, { x: isMobile ? 0 : 0.6, y: 0.04, roll: 0, pitch: 0.05, scale: 0.86 }, 1)
+        .to(canScroll, { x: isMobile ? 0 : 0.5, z: 0, y: 0.04, roll: 0, pitch: 0.05, scale: 0.86 }, 1)
         .to(spin, { value: TAU * 1.15, onUpdate: applySpin }, 1)
         .to(camera.position, { z: STAGE.distance * 0.95 }, 1)
 
         // 2 -> 3  Descends into the rising liquid, tipping as it goes.
-        .to(canScroll, { x: 0, y: -0.14, roll: -0.55, pitch: 0.1, scale: 0.96, bobAmount: 0.18 }, 2)
+        .to(canScroll, { x: 0, z: -0.22, y: -0.14, roll: -0.55, pitch: 0.1, scale: 0.96, bobAmount: 0.18 }, 2)
         .to(spin, { value: TAU * 1.62, onUpdate: applySpin }, 2)
         .to(camera.position, { z: STAGE.distance * 0.84 }, 2)
 
         // 3 -> 4  Lifts clear as the liquid drains, squares up for the panels.
-        .to(canScroll, { x: isMobile ? 0 : -0.12, y: 0.02, roll: -0.28, pitch: 0, scale: 0.9, bobAmount: 0.5 }, 3)
+        .to(canScroll, { x: isMobile ? 0 : -0.12, z: 0, y: 0.02, roll: -0.28, pitch: 0, scale: 0.9, bobAmount: 0.5 }, 3)
         .to(spin, { value: TAU * 2.1, onUpdate: applySpin }, 3)
         .to(camera.position, { z: STAGE.distance }, 3)
 
         // 4 -> 5  Rises and shrinks toward the dissolve.
-        .to(canScroll, { x: 0, y: 0.2, roll: -0.46, scale: 0.62, bobAmount: 1 }, 4)
+        .to(canScroll, { x: 0, z: -0.18, y: 0.2, roll: -0.46, scale: 0.62, bobAmount: 1 }, 4)
         .to(spin, { value: TAU * 2.75, onUpdate: applySpin }, 4)
 
         // 5 -> 6  Settles small and centred above the wordmark.
-        .to(canScroll, { y: 0.5, roll: -0.24, scale: 0.42 }, 5)
+        .to(canScroll, { z: 0, y: 0.5, roll: -0.24, scale: 0.42 }, 5)
         .to(spin, { value: TAU * 3.1, onUpdate: applySpin }, 5)
         .to(camera.position, { z: STAGE.distance * 1.06 }, 5);
 
