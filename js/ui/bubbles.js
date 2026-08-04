@@ -9,6 +9,8 @@ export function initBubbles() {
         const bubble = document.createElement('img');
         bubble.src = ASSETS.bubble;
         bubble.className = 'bubble-img';
+        bubble.alt = '';
+        bubble.decoding = 'async';
         bubble.style.width = `${Math.random() * 20 + 10}px`;
         bubble.style.left = `${Math.random() * 100}%`;
         bubble.style.opacity = Math.random() * 0.4 + 0.2;

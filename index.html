@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diet Soda | Pure Zero Refreshment</title>
     <meta name="description" content="Experience the crisp, clean taste of Diet Soda. Zero sugar, zero compromise.">
+    <meta name="theme-color" content="#011411">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Diet Soda | Pure Zero Refreshment">
+    <meta property="og:description" content="Zero sugar, zero compromise. Four ingredients, nothing to hide.">
+    <meta property="og:image" content="assets/card-green.png">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23011411'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23fbcfe8' stroke-width='1.6'/%3E%3Cpath d='M12 8v8M8 12h8' stroke='%23fbcfe8' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,14 +94,14 @@
                 <div class="hero-right">
                     <div class="product-carousel">
                         <div class="carousel-cards">
-                            <div class="card active" data-flavor="classic">
+                            <div class="card active" data-flavor="classic" data-cursor="Pick">
                                 <img src="assets/card-green.png" alt="Diet Classic">
                                 <div class="card-info">
                                     <span>Diet Classic</span>
                                     <span>$2.99</span>
                                 </div>
                             </div>
-                            <div class="card" data-flavor="blue">
+                            <div class="card" data-flavor="blue" data-cursor="Pick">
                                 <img src="assets/card-blue.png" alt="Zero Lime" style="filter: brightness(0.7);">
                                 <div class="card-info">
                                     <span>Zero Lime</span>
@@ -104,8 +110,8 @@
                             </div>
                         </div>
                         <div class="carousel-nav">
-                            <button class="nav-arrow" data-dir="-1">←</button>
-                            <button class="nav-arrow" data-dir="1">→</button>
+                            <button class="nav-arrow" data-dir="-1" aria-label="Previous flavour" data-cursor="Prev">←</button>
+                            <button class="nav-arrow" data-dir="1" aria-label="Next flavour" data-cursor="Next">→</button>
                         </div>
                     </div>
                     <h2 class="side-title">
@@ -134,7 +140,7 @@
                         <p class="act-lede" data-fade>Carbonated water, real guaraná, natural cherry
                             extract, a whisper of citrus leaf. That is the entire list.</p>
                     </div>
-                    <div class="anatomy-label" data-label="cherry" style="top: 22%; left: 79%;">
+                    <div class="anatomy-label" data-label="cherry" style="top: 20%; left: 79%;">
                         <svg class="anatomy-label__line" viewBox="0 0 84 1" preserveAspectRatio="none">
                             <path d="M0 0.5 H84" />
                         </svg>
@@ -143,7 +149,16 @@
                             <span class="anatomy-label__note">COLD PRESSED · 0g SUGAR</span>
                         </span>
                     </div>
-                    <div class="anatomy-label" data-label="leaf" style="top: 46%; left: 79%;">
+                    <div class="anatomy-label" data-label="guarana" style="top: 34%; left: 79%;">
+                        <svg class="anatomy-label__line" viewBox="0 0 84 1" preserveAspectRatio="none">
+                            <path d="M0 0.5 H84" />
+                        </svg>
+                        <span class="anatomy-label__text">
+                            <span class="anatomy-label__name">Real guaran&aacute;</span>
+                            <span class="anatomy-label__note">AMAZON GROWN &middot; NATURAL CAFFEINE</span>
+                        </span>
+                    </div>
+                    <div class="anatomy-label" data-label="leaf" style="top: 48%; left: 79%;">
                         <svg class="anatomy-label__line" viewBox="0 0 84 1" preserveAspectRatio="none">
                             <path d="M0 0.5 H84" />
                         </svg>
@@ -152,7 +167,7 @@
                             <span class="anatomy-label__note">AROMATIC · TRACE</span>
                         </span>
                     </div>
-                    <div class="anatomy-label" data-label="water" style="top: 70%; left: 79%;">
+                    <div class="anatomy-label" data-label="water" style="top: 62%; left: 79%;">
                         <svg class="anatomy-label__line" viewBox="0 0 84 1" preserveAspectRatio="none">
                             <path d="M0 0.5 H84" />
                         </svg>

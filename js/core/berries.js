@@ -112,11 +112,21 @@ export async function initBerries() {
     }
 }
 
-// Both models must reach the GPU during load. Otherwise the first flavour
-// switch uploads blueberry geometry mid-scroll and drops a frame.
+// Both models must reach the GPU during load, otherwise the first flavour
+// switch pays for the blueberry upload. Visibility alone is not enough: the
+// inactive set's instanceMatrix is still all zeros at that point, so it draws
+// degenerate triangles and the driver never uploads its textures. Copy the
+// live matrices across first so the warm draw is real.
 export function warmBerries() {
+    const src = sets.cherry[0];
+    sets.blueberry.forEach((m) => {
+        if (src && m.instanceMatrix.array.length === src.instanceMatrix.array.length) {
+            m.instanceMatrix.array.set(src.instanceMatrix.array);
+            m.instanceMatrix.needsUpdate = true;
+        }
+        m.visible = true;
+    });
     sets.cherry.forEach((m) => { m.visible = true; });
-    sets.blueberry.forEach((m) => { m.visible = true; });
 }
 
 export function settleBerries() {

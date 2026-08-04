@@ -1,4 +1,4 @@
-import { gsap } from '../scroll/smooth.js';
+import { gsap, ScrollTrigger } from '../scroll/smooth.js';
 import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
 import { setBackgroundFlavor } from '../core/background.js';
@@ -89,7 +89,7 @@ export function initFlavour() {
     const panels = track.querySelectorAll('.flavour-panel');
     const distance = () => track.scrollWidth - window.innerWidth;
 
-    gsap.to(track, {
+    const trackTween = gsap.to(track, {
         x: () => -distance(),
         ease: 'none',
         scrollTrigger: {

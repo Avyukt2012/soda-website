@@ -50,6 +50,23 @@ export function resize() {
 
 window.addEventListener('resize', resize);
 
+// A lost context (GPU reset, driver hiccup, tab backgrounded too long) would
+// otherwise leave a permanently blank canvas with no error.
+canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    document.body.classList.add('gl-lost');
+}, false);
+
+canvas.addEventListener('webglcontextrestored', () => {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, STAGE.maxDpr));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = STAGE.exposure;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    document.body.classList.remove('gl-lost');
+}, false);
+
 export function render() {
     renderer.render(scene, camera);
 }

@@ -34,6 +34,7 @@ export const canScroll = {
     punch: 1,
     bobAmount: 1,
     opacity: 1,
+    fade: 1,
 };
 
 let baseMaterials = [];
@@ -149,6 +150,7 @@ onFrame((delta, elapsed) => {
     canRig.rotation.z = canScroll.roll;
     canRig.scale.setScalar(canScroll.scale * canScroll.punch);
 
-    for (const mat of allMaterials) mat.opacity = canScroll.opacity;
-    canRig.visible = canScroll.opacity > 0.01;
+    const shown = canScroll.opacity * canScroll.fade;
+    for (const mat of allMaterials) mat.opacity = shown;
+    canRig.visible = shown > 0.01;
 });
