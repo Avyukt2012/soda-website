@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger } from '../scroll/smooth.js';
+import { gsap } from '../scroll/smooth.js';
 import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
 import { setBackgroundFlavor } from '../core/background.js';
@@ -14,7 +14,7 @@ export function onFlavorChange(fn) { listeners.add(fn); }
 
 export function getFlavor() { return current; }
 
-export function applyFlavor(flavor, { instant = false, spin: doSpin = true } = {}) {
+export function applyFlavor(flavor, { instant = false } = {}) {
     if (!FLAVORS[flavor] || flavor === current) return;
     current = flavor;
 
@@ -42,18 +42,8 @@ export function applyFlavor(flavor, { instant = false, spin: doSpin = true } = {
     }
     switching = true;
 
-    // Scroll-driven changes get no spin of their own. The journey is already
-    // rotating the can, and layering a second rotation on top is what made
-    // this read as choppy. A brief punch masks the swap instead.
-    if (!doSpin) {
-        gsap.timeline({ onComplete: () => { switching = false; } })
-            .to(canScroll, { punch: 1.07, duration: 0.28, ease: 'power2.out', onComplete: swap })
-            .to(canScroll, { punch: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' });
-        return;
-    }
-
-    // Click-driven: a full turn, swapped at the fastest part of the rotation.
-    // Runs on its own channel so it sums with the journey rather than
+    // A full turn, swapped at the fastest part of the rotation. Runs on its
+    // own spin channel so it sums with the scroll journey rather than
     // fighting it, and unwinds to zero instead of being slammed there.
     const spin = { value: 0 };
     const apply = () => setFlavourSpin(spin.value);
@@ -99,7 +89,7 @@ export function initFlavour() {
     const panels = track.querySelectorAll('.flavour-panel');
     const distance = () => track.scrollWidth - window.innerWidth;
 
-    const trackTween = gsap.to(track, {
+    gsap.to(track, {
         x: () => -distance(),
         ease: 'none',
         scrollTrigger: {
@@ -109,17 +99,6 @@ export function initFlavour() {
             scrub: 1,
             invalidateOnRefresh: true,
         },
-    });
-
-    panels.forEach((panel) => {
-        ScrollTrigger.create({
-            trigger: panel,
-            containerAnimation: trackTween,
-            start: 'left center',
-            end: 'right center',
-            onEnter: () => applyFlavor(panel.dataset.flavour, { spin: false }),
-            onEnterBack: () => applyFlavor(panel.dataset.flavour, { spin: false }),
-        });
     });
 
     if (!isMobile) {
