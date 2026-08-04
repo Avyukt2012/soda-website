@@ -28,9 +28,11 @@ export const canScroll = {
     pitch: 0,
     scale: 1,
     bobAmount: 1,
+    opacity: 1,
 };
 
 let baseMaterials = [];
+let allMaterials = [];
 const textures = {};
 
 export async function initCan() {
@@ -54,9 +56,10 @@ export async function initCan() {
     canPivot.add(model);
     canRig.rotation.z = STAGE.roll;
 
-    baseMaterials = collectMeshes(model)
-        .map((m) => m.material)
-        .filter((m) => m && m.map);
+    allMaterials = collectMeshes(model).map((m) => m.material).filter(Boolean);
+    allMaterials.forEach((m) => { m.transparent = true; });
+
+    baseMaterials = allMaterials.filter((m) => m.map);
 
     const [green, blue] = await Promise.all([
         loadTexture(ASSETS.texGreen),
@@ -104,4 +107,7 @@ onFrame((delta, elapsed) => {
     canRig.position.set(canScroll.x, canScroll.y + bob, canScroll.z);
     canRig.rotation.z = canScroll.roll;
     canRig.scale.setScalar(canScroll.scale);
+
+    for (const mat of allMaterials) mat.opacity = canScroll.opacity;
+    canRig.visible = canScroll.opacity > 0.01;
 });

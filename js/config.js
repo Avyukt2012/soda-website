@@ -1,15 +1,17 @@
-const BASE = 'https://api.getlayers.ai/storage/v1/object/public/public/assets/soda-14ff8a788d';
+// Vendored locally: the origin CDN throttles under repeated loads, and a
+// self-contained asset folder is what makes this deployable.
+const BASE = 'assets';
 
 export const ASSETS = {
-    can: `${BASE}/deit_soda2.glb`,
+    can: `${BASE}/can.glb`,
     cherry: `${BASE}/cherry.glb`,
     blueberry: `${BASE}/blueberry.glb`,
     leaves: `${BASE}/leaves.glb`,
-    texGreen: `${BASE}/green%20base%20color.jpg`,
-    texBlue: `${BASE}/blue%20base%20color.jpg`,
+    texGreen: `${BASE}/tex-green.jpg`,
+    texBlue: `${BASE}/tex-blue.jpg`,
     bubble: `${BASE}/bubble.png`,
-    cardGreen: `${BASE}/Green%20Soda.png`,
-    cardBlue: `${BASE}/Blue%20Soda.png`,
+    cardGreen: `${BASE}/card-green.png`,
+    cardBlue: `${BASE}/card-blue.png`,
 };
 
 export const FLAVORS = {
@@ -33,7 +35,9 @@ export const STAGE = {
     fov: 30,
     distance: 3.8,
     roll: -25 * Math.PI / 180,
-    fill: 0.71,
+    // The can has to share a phone screen with the whole hero stack, so it
+    // takes a much smaller share of the frame there.
+    fill: matchMedia('(max-width: 900px)').matches ? 0.4 : 0.71,
     exposure: 1.15,
     maxDpr: 1.5,
 };

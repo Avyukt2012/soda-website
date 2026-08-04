@@ -104,7 +104,11 @@
 /* Act 3 - pour */
 .pour-copy {
     text-align: center;
-    max-width: 22ch;
+}
+
+.pour-copy .act-lede {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Act 4 - flavour horizontal */
@@ -278,5 +282,37 @@
     .act--pour    { height: 180vh; }
     .act--flavour { height: 200vh; }
     .act--eco     { height: 150vh; }
-    .anatomy-copy { position: static; max-width: none; }
+
+    .act__pin { padding: 0 7%; align-items: flex-start; padding-top: 16vh; }
+
+    .act-title { font-size: clamp(2.8rem, 13vw, 4.2rem); white-space: normal; }
+    .act-lede { font-size: 0.95rem; margin-top: 1.1rem; }
+    .eyebrow { font-size: 0.62rem; margin-bottom: 1rem; }
+
+    /* Leader lines have nowhere to point on a narrow screen, so the labels
+       become a stacked list under the copy instead. */
+    .anatomy-stage { display: flex; flex-direction: column; gap: 1.4rem; }
+    .anatomy-copy { position: static; }
+
+    .anatomy-label {
+        position: static !important;
+        opacity: 1;
+        gap: 0.6rem;
+        margin-top: 0.2rem;
+    }
+
+    .anatomy-label__line { width: 26px; flex: 0 0 26px; }
+    .anatomy-label__name { font-size: 0.78rem; }
+    .anatomy-label__note { font-size: 0.62rem; }
+
+    .flavour-panel { padding: 0 7%; }
+    .flavour-panel__name { font-size: clamp(2.8rem, 14vw, 4.5rem); }
+    .flavour-panel__notes { flex-direction: column; gap: 0.4rem; font-size: 0.72rem; }
+
+    .marquee__item { font-size: clamp(1.8rem, 8vw, 2.6rem); }
+    .footer-title { font-size: clamp(3rem, 17vw, 5rem); }
+    .footer-meta { flex-direction: column; gap: 0.5rem; font-size: 0.68rem; }
+    .footer-inner { gap: 1.4rem; }
+
+    .scroll-cue { display: none; }
 }

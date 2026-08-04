@@ -4,6 +4,7 @@ import { berryState } from '../core/berries.js';
 import { leafState } from '../core/leaves.js';
 import { camera } from '../core/stage.js';
 import { postState } from '../core/post.js';
+import { ecoState } from '../core/particles.js';
 import { STAGE, isMobile } from '../config.js';
 
 const TAU = Math.PI * 2;
@@ -89,9 +90,32 @@ export function initChoreography() {
             scrub: 1,
         },
     })
-        .fromTo(postState, { fill: 0 }, { fill: 0.62, ease: 'power1.inOut', duration: 1 })
-        .to(postState, { fill: 1.05, ease: 'power2.inOut', duration: 0.8 })
-        .to(postState, { fill: 0, ease: 'power2.in', duration: 1 });
+        // Liquid climbs, briefly closes over the can, then drains away.
+        .fromTo(postState, { fill: 0 }, { fill: 0.55, ease: 'power1.out', duration: 1.1 })
+        .to(postState, { fill: 1.04, ease: 'power2.in', duration: 0.7 })
+        .to(postState, { fill: 0.92, ease: 'power1.inOut', duration: 0.35 })
+        .to(postState, { fill: 0, ease: 'power3.in', duration: 0.95 })
+        // The can settles into the rising liquid rather than being crossed by
+        // a line, then lifts clear as it drains.
+        .to(canScroll, { y: -0.16, roll: -0.78, duration: 1.5, ease: 'power1.inOut' }, 0)
+        .to(canScroll, { y: 0.12, roll: -0.42, duration: 1.3, ease: 'power2.out' }, 1.8);
+
+    // Act 5 - the can breaks into particles that reform as a loop.
+    gsap.timeline({
+        scrollTrigger: {
+            trigger: '#act-eco',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+        },
+    })
+        .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' })
+        .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 2.2, ease: 'none' }, 0)
+        // The can hands itself over to the particles rather than sitting
+        // behind them, then reassembles for the footer.
+        .to(canScroll, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 0.25)
+        .to(canScroll, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.85)
+        .to(ecoState, { opacity: 0, duration: 0.4, ease: 'power2.in' }, 2.0);
 
     ['#act-handoff', '#act-anatomy', '#act-pour', '#act-flavour', '#act-eco'].forEach((sel) => {
         if (document.querySelector(sel)) ScrollTrigger.create(pin(sel));

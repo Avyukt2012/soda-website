@@ -44,6 +44,10 @@ const material = new THREE.ShaderMaterial({
             vec3 col = mix(uInner, uMid, smoothstep(0.0, 0.62, r));
             col = mix(col, uOuter, smoothstep(0.55, 1.18, r));
 
+            // ACESFilmic pulls midtones down; pre-lift so the gradient reads
+            // at the same weight it did as a CSS background.
+            col *= 1.45;
+
             gl_FragColor = vec4(col, 1.0);
         }`,
 });

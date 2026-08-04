@@ -18,7 +18,7 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){
     float v = 0.0, a = 0.5;
-    for (int i = 0; i < 4; i++) { v += a * noise(p); p *= 2.02; a *= 0.5; }
+    for (int i = 0; i < 3; i++) { v += a * noise(p); p *= 2.03; a *= 0.5; }
     return v;
 }`;
 
@@ -46,6 +46,16 @@ const LiquidShader = {
         varying vec2 vUv;
         ${NOISE}
 
+        // Layered surface: a slow swell, a mid roll, and a fine chop. One
+        // frequency alone is what made this read as a drawn line.
+        float surfaceAt(float x) {
+            float s = uFill * 1.16 - 0.09;
+            s += (fbm(vec2(x * 1.9 + uTime * 0.11, uTime * 0.08)) - 0.5) * 0.085;
+            s += sin(x * 7.0 - uTime * 0.62) * 0.016;
+            s += sin(x * 19.0 + uTime * 1.25) * 0.0055;
+            return s;
+        }
+
         void main() {
             vec2 uv = vUv;
             vec3 base = texture2D(tDiffuse, uv).rgb;
@@ -55,29 +65,52 @@ const LiquidShader = {
                 return;
             }
 
-            float wave = fbm(vec2(uv.x * 3.4 + uTime * 0.22, uTime * 0.16)) - 0.5;
-            float ripple = sin(uv.x * 17.0 - uTime * 1.05) * 0.008;
-            float surface = uFill * 1.12 - 0.06 + wave * 0.05 + ripple;
+            float surface = surfaceAt(uv.x);
+            float d = surface - uv.y;
 
-            float below = step(uv.y, surface);
-            float depth = clamp((surface - uv.y) / max(surface, 0.001), 0.0, 1.0);
+            // Everything well clear of the waterline skips the expensive work.
+            if (d < -0.07) {
+                gl_FragColor = vec4(base, 1.0);
+                return;
+            }
 
+            float inside = smoothstep(-0.0035, 0.0035, d);
+            float depth = clamp(d / max(uFill, 0.08), 0.0, 1.0);
+
+            // Refraction strengthens with depth and carries a noise wobble so
+            // it distorts organically instead of shearing uniformly.
+            float warp = fbm(vec2(uv.x * 5.5, uv.y * 5.5 - uTime * 0.45)) - 0.5;
             vec2 disp = vec2(
-                sin(uv.y * 26.0 + uTime * 1.35) * 0.0065,
-                cos(uv.x * 21.0 - uTime * 1.0) * 0.0042
-            ) * depth * below;
+                sin(uv.y * 20.0 + uTime * 1.05) * 0.011 + warp * 0.022,
+                cos(uv.x * 13.0 - uTime * 0.85) * 0.007
+            ) * (0.22 + depth * 1.5) * inside;
 
-            vec3 refracted = texture2D(tDiffuse, uv + disp).rgb;
-            vec3 liquid = mix(refracted, refracted * uColor * 1.75, 0.5);
-            liquid *= mix(1.0, 0.68, depth);
+            // Chromatic split, strongest right under the surface
+            float ca = 0.0022 * inside * (1.0 - depth * 0.55);
+            vec3 refr;
+            refr.r = texture2D(tDiffuse, uv + disp + vec2(ca, 0.0)).r;
+            refr.g = texture2D(tDiffuse, uv + disp).g;
+            refr.b = texture2D(tDiffuse, uv + disp - vec2(ca, 0.0)).b;
 
-            float band = smoothstep(0.014, 0.0, abs(uv.y - surface));
-            liquid += band * 0.4;
+            // Absorption: light falls off and colour saturates with depth
+            vec3 liquid = refr * mix(vec3(1.0), uColor * 2.0, 0.34 + depth * 0.38);
+            liquid *= exp(-depth * 1.15);
+            liquid += uColor * depth * 0.12;
 
-            float meniscus = smoothstep(0.045, 0.0, surface - uv.y) * below;
-            liquid += meniscus * 0.14;
+            // Caustics gathering just beneath the waterline
+            float caust = fbm(vec2(uv.x * 6.5 + uTime * 0.33, uv.y * 6.5 - uTime * 0.5));
+            liquid += uColor * pow(max(caust, 0.0), 3.0) * (1.0 - depth) * inside * 0.7;
 
-            gl_FragColor = vec4(mix(base, liquid, below), 1.0);
+            // Carbonation rising inside the liquid
+            float bub = fbm(vec2(uv.x * 24.0, uv.y * 24.0 + uTime * 1.5));
+            liquid += smoothstep(0.76, 0.94, bub) * inside * (0.3 - depth * 0.18);
+
+            // Meniscus: a crisp highlight plus a soft bloom, never a hard band
+            float edge = abs(uv.y - surface);
+            liquid += smoothstep(0.0032, 0.0, edge) * 0.5;
+            liquid += smoothstep(0.055, 0.0, edge) * 0.14;
+
+            gl_FragColor = vec4(mix(base, liquid, inside), 1.0);
         }`,
 };
 
@@ -103,8 +136,8 @@ const GrainVignetteShader = {
             vec3 col = texture2D(tDiffuse, vUv).rgb;
 
             vec2 d = vUv - 0.5;
-            float vig = smoothstep(0.86, 0.22, dot(d, d) * uVignette * 2.4);
-            col *= mix(0.72, 1.0, vig);
+            float vig = smoothstep(1.15, 0.1, dot(d, d) * uVignette * 2.4);
+            col *= mix(0.88, 1.0, vig);
 
             float g = rand(vUv + fract(uTime)) - 0.5;
             col += g * uGrain;

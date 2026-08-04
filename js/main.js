@@ -5,10 +5,15 @@ import { onFrame, start } from './core/loop.js';
 import { initCan } from './core/can.js';
 import { initBerries } from './core/berries.js';
 import { initLeaves } from './core/leaves.js';
+import { setParticleColor } from './core/particles.js';
 import { initBubbles } from './ui/bubbles.js';
-import { ScrollTrigger } from './scroll/smooth.js';
+import { createLoader } from './ui/loader.js';
+import { initCursor } from './ui/cursor.js';
+import { initAudio, tick } from './ui/audio.js';
+import { ScrollTrigger, lenis } from './scroll/smooth.js';
 import { initChoreography } from './acts/choreography.js';
-import { initFlavour } from './acts/flavour.js';
+import { initFlavour, onFlavorChange } from './acts/flavour.js';
+import { initAnatomy } from './acts/anatomy.js';
 import { initTextReveals, initHeroIntro, initMarquee, initMagnetic } from './ui/text.js';
 
 function initPerfOverlay() {
@@ -20,12 +25,15 @@ function initPerfOverlay() {
 
     let frames = 0;
     let acc = 0;
+    let worst = 999;
     onFrame((delta) => {
         frames++;
         acc += delta;
         if (acc >= 0.5) {
+            const fps = Math.round(frames / acc);
+            worst = Math.min(worst, fps);
             const info = renderer.info.render;
-            el.textContent = `${Math.round(frames / acc)} fps · ${info.calls} calls · ${info.triangles.toLocaleString()} tris`;
+            el.textContent = `${fps} fps (min ${worst}) · ${info.calls} calls · ${info.triangles.toLocaleString()} tris`;
             frames = 0;
             acc = 0;
         }
@@ -33,28 +41,44 @@ function initPerfOverlay() {
 }
 
 async function boot() {
+    const loader = createLoader();
+
     // Registered last so every scene update for the frame has already run.
     onFrame(renderPost);
     start();
     initPerfOverlay();
+    initCursor();
     initBubbles();
     initMarquee();
     initMagnetic();
+    initAudio();
+
+    lenis.stop();
 
     try {
         await Promise.all([initCan(), initBerries(), initLeaves()]);
     } catch (err) {
         console.error('[boot] scene failed to load', err);
         document.body.dataset.bootError = String(err);
+        loader.fail();
     }
 
     initChoreography();
     initFlavour();
+    initAnatomy();
     initTextReveals();
-    initHeroIntro();
+
+    onFlavorChange((flavor) => {
+        tick(1);
+        setParticleColor(flavor === 'blue' ? 0xbfdbfe : 0xfbcfe8);
+    });
 
     document.body.classList.add('is-ready');
     ScrollTrigger.refresh();
+
+    await loader.finish();
+    lenis.start();
+    initHeroIntro();
 }
 
 boot();
