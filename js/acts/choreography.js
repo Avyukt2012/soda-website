@@ -81,6 +81,23 @@ export function initChoreography() {
 
     gsap.timeline({
         scrollTrigger: {
+            trigger: '#act-handoff',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: SCRUB,
+        },
+        defaults: { ease: 'power2.inOut' },
+    })
+        .fromTo(canScroll, { fade: 1 }, { fade: 0.26, duration: 1 })
+        .to(canScroll, { fade: 0.26, duration: 0.5 })
+        .to(canScroll, { fade: 1, duration: 1 })
+        .fromTo(berryState,
+            { orbitScale: 1.9, orbitLift: 1.4 },
+            { orbitScale: 0.78, orbitLift: 0.5, duration: 1.4 }, 0)
+        .to(berryState, { orbitScale: 1.35, orbitLift: 1, duration: 1.1 });
+
+    gsap.timeline({
+        scrollTrigger: {
             trigger: '#act-pour',
             start: 'top bottom',
             end: 'bottom top',

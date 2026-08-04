@@ -97,6 +97,10 @@ async function boot() {
         loader.fail();
     }
 
+    try {
+        await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+    } catch { /* fall through on fallback metrics rather than block boot */ }
+
     initChoreography();
     initNav();
     initFlavour();

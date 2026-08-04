@@ -22,6 +22,8 @@ export const berryState = {
     spread: 1,
     opacity: 1,
     repel: 1,
+    orbitScale: 1,
+    orbitLift: 1,
 };
 
 const pointer = new THREE.Vector2(-10, -10);
@@ -154,9 +156,10 @@ onFrame((delta, elapsed) => {
 
         if (cap > 0.001) {
             const a = b.orbitAngle + elapsed * b.orbitSpeed;
-            tmp.x += (Math.cos(a) * b.orbitRadius - tmp.x) * cap;
-            tmp.y += (b.orbitY + bobY * 0.4 - tmp.y) * cap;
-            tmp.z += (Math.sin(a) * b.orbitRadius - tmp.z) * cap;
+            const rad = b.orbitRadius * berryState.orbitScale;
+            tmp.x += (Math.cos(a) * rad - tmp.x) * cap;
+            tmp.y += (b.orbitY * berryState.orbitLift + bobY * 0.4 - tmp.y) * cap;
+            tmp.z += (Math.sin(a) * rad - tmp.z) * cap;
         }
 
         if (exp > 0.001) {
