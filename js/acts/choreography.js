@@ -118,12 +118,25 @@ export function initChoreography() {
             scrub: SCRUB,
         },
     })
-        .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' })
-        .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 1.35, ease: 'power2.inOut' }, 0)
-        .to(ecoState, { progress: 1, duration: 0.75 })
-        .to(canScroll, { opacity: 0, duration: 0.45, ease: 'power2.in' }, 0.2)
-        .to(canScroll, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 2.25)
-        .to(ecoState, { opacity: 0, duration: 0.45, ease: 'power2.in' }, 2.35);
+        .fromTo(ecoState, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+        .fromTo(ecoState, { progress: 0 }, { progress: 1, duration: 2.6, ease: 'sine.inOut' }, 0)
+        .to(ecoState, { progress: 1, duration: 0.9 })
+        .to(canScroll, { opacity: 0, duration: 0.7, ease: 'power2.in' }, 0.3)
+        .to(canScroll, { opacity: 1, duration: 0.75, ease: 'power2.out' }, 3.6)
+        .to(ecoState, { opacity: 0, duration: 0.6, ease: 'power2.in' }, 3.7);
+
+    gsap.timeline({
+        scrollTrigger: {
+            trigger: '#act-reviews',
+            start: 'top 80%',
+            end: 'bottom top',
+            scrub: SCRUB,
+        },
+        defaults: { ease: 'sine.inOut' },
+    })
+        .fromTo(canScroll, { dim: 1 }, { dim: 0.12, duration: 0.6 })
+        .to(canScroll, { dim: 0.12, duration: 0.9 })
+        .to(canScroll, { dim: 1, duration: 0.6 });
 
     ['#act-handoff', '#act-anatomy', '#act-pour', '#act-flavour', '#act-eco'].forEach((sel) => {
         if (document.querySelector(sel)) ScrollTrigger.create(pin(sel));

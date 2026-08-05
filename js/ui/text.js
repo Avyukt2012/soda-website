@@ -78,6 +78,7 @@ export function initMarquee() {
     const state = rows.map((row) => ({
         el: row,
         dir: Number(row.dataset.marquee) || 1,
+        depth: parseFloat(row.dataset.depth) || 1,
         offset: 0,
         width: row.scrollWidth / 2,
     }));
@@ -86,16 +87,60 @@ export function initMarquee() {
     window.addEventListener('resize', remeasure);
     ScrollTrigger.addEventListener('refreshInit', remeasure);
 
+    let live = false;
+    const section = document.getElementById('act-reviews');
+    if (section && 'IntersectionObserver' in window) {
+        new IntersectionObserver(
+            ([e]) => { live = e.isIntersecting; },
+            { rootMargin: '20% 0px' }
+        ).observe(section);
+    } else {
+        live = true;
+    }
+
     onFrame((delta) => {
+        if (!live) return;
         const boost = Math.min(Math.abs(scrollState.smoothVelocity) * 0.35, 26);
         const skew = gsap.utils.clamp(-9, 9, scrollState.smoothVelocity * 0.22);
 
         state.forEach((s) => {
-            s.offset -= (34 + boost) * s.dir * delta;
+            s.offset -= (34 + boost) * s.dir * s.depth * delta;
             if (s.width > 0) s.offset = ((s.offset % s.width) + s.width) % s.width;
-            s.el.style.transform = `translate3d(${-s.offset}px,0,0) skewX(${skew}deg)`;
+            s.el.style.transform =
+                `translate3d(${-s.offset}px,0,0) skewX(${skew * s.depth}deg)`;
         });
     });
+}
+
+export function initScore() {
+    const num = document.querySelector('[data-count-to]');
+    if (!num) return;
+    const target = parseFloat(num.dataset.countTo);
+    const stars = [...document.querySelectorAll('.score__star')];
+
+    gsap.set(stars, { scale: 0, opacity: 0, rotate: -35 });
+
+    const counter = { value: 0 };
+    gsap.timeline({
+        scrollTrigger: {
+            trigger: '#act-reviews',
+            start: 'top 62%',
+            end: 'top 12%',
+            scrub: SCRUB,
+        },
+    })
+        .to(counter, {
+            value: target,
+            ease: 'none',
+            onUpdate: () => { num.textContent = counter.value.toFixed(1); },
+        }, 0)
+        .to(stars, {
+            scale: 1,
+            opacity: 1,
+            rotate: 0,
+            ease: 'back.out(2)',
+            stagger: 0.35,
+        }, 0);
 }
 
 export function initMagnetic() {

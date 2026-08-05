@@ -16,7 +16,7 @@ import { ScrollTrigger, lenis } from './scroll/smooth.js';
 import { initChoreography } from './acts/choreography.js';
 import { initFlavour, onFlavorChange } from './acts/flavour.js';
 import { initAnatomy } from './acts/anatomy.js';
-import { initTextReveals, initHeroIntro, initMarquee, initMagnetic } from './ui/text.js';
+import { initTextReveals, initHeroIntro, initMarquee, initMagnetic, initScore } from './ui/text.js';
 
 function initPerfOverlay() {
     if (!new URLSearchParams(location.search).has('debug')) return;
@@ -106,6 +106,7 @@ async function boot() {
     initFlavour();
     initAnatomy();
     initTextReveals();
+    initScore();
 
     onFlavorChange(() => {
         tick(1);

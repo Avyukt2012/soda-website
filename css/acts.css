@@ -19,7 +19,7 @@
 .act--anatomy { height: 240vh; }
 .act--pour    { height: 220vh; }
 .act--flavour { height: 240vh; }
-.act--eco     { height: 180vh; }
+.act--eco     { height: 280vh; }
 .act--reviews { height: 100vh; }
 .act--footer  { height: 100vh; }
 
@@ -288,7 +288,7 @@
     .act--anatomy { height: 200vh; }
     .act--pour    { height: 180vh; }
     .act--flavour { height: 200vh; }
-    .act--eco     { height: 150vh; }
+    .act--eco     { height: 230vh; }
 
     .act__pin { padding: 0 7%; align-items: flex-start; padding-top: 16vh; }
 
@@ -334,4 +334,67 @@
     .magnetic__dot { width: 28px; height: 28px; font-size: 0.95rem; }
 
     .scroll-cue { display: none; }
+}
+
+.reviews-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 5vh, 4rem);
+    width: 100%;
+}
+
+.reviews-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.score__row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+.score__num {
+    font-family: var(--font-heading);
+    font-size: clamp(4rem, 11vw, 11rem);
+    line-height: 0.85;
+    color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.score__stars {
+    display: flex;
+    gap: 0.35rem;
+    align-self: center;
+}
+
+.score__star {
+    width: clamp(20px, 2.4vw, 34px);
+    height: clamp(20px, 2.4vw, 34px);
+    fill: var(--accent);
+    transform-origin: center;
+}
+
+.score__meta {
+    margin-top: 1.1rem;
+    font-family: var(--font-nav);
+    font-size: 0.66rem;
+    letter-spacing: 0.24em;
+    color: var(--muted-color);
+}
+
+.marquee__row--lead .marquee__item { opacity: 1; }
+.marquee__row:not(.marquee__row--lead) .marquee__item {
+    opacity: 0.32;
+    font-size: clamp(1.6rem, 3.4vw, 3.4rem);
+}
+
+@media (max-width: 900px) {
+    .reviews-stage { gap: 1.6rem; }
+    .score__row { flex-direction: column; align-items: center; gap: 0.6rem; }
+    .score__meta { font-size: 0.56rem; letter-spacing: 0.18em; }
+    .marquee__row:not(.marquee__row--lead) .marquee__item { font-size: clamp(1.1rem, 5.5vw, 1.7rem); }
 }
