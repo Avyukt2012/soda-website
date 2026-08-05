@@ -100,10 +100,14 @@ export function initFlavour() {
         gsap.from(panels, {
             y: 60,
             opacity: 0,
-            duration: 1,
-            ease: 'power3.out',
-            stagger: 0.12,
-            scrollTrigger: { trigger: section, start: 'top 70%', once: true },
+            ease: 'none',
+            stagger: 0.3,
+            scrollTrigger: {
+                trigger: section,
+                start: 'top 85%',
+                end: 'top 40%',
+                scrub: SCRUB,
+            },
         });
     }
 }

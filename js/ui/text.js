@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger, scrollState } from '../scroll/smooth.js';
+import { gsap, ScrollTrigger, scrollState, SCRUB } from '../scroll/smooth.js';
 import SplitText from 'gsap/SplitText';
 import { onFrame } from '../core/loop.js';
 
@@ -15,10 +15,14 @@ export function initTextReveals() {
             yPercent: 0,
             rotate: 0,
             opacity: 1,
-            duration: 1.15,
-            ease: EASE_OUT,
-            stagger: { each: 0.028, from: 'start' },
-            scrollTrigger: { trigger: el, start: 'top 82%', once: true },
+            ease: 'none',
+            stagger: { each: 0.4, from: 'start' },
+            scrollTrigger: {
+                trigger: el,
+                start: 'top 88%',
+                end: 'top 42%',
+                scrub: SCRUB,
+            },
         });
     });
 
@@ -28,9 +32,13 @@ export function initTextReveals() {
             {
                 y: 0,
                 opacity: 1,
-                duration: 0.95,
-                ease: EASE_OUT,
-                scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 92%',
+                    end: 'top 62%',
+                    scrub: SCRUB,
+                },
             }
         );
     });
