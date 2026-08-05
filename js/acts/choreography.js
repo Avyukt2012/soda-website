@@ -36,20 +36,20 @@ export function initChoreography() {
 
     const step = isMobile
         ? [
-            { x: 0,  y: -0.16, z: -0.45, roll: -0.30, pitch: 0.04, scale: 0.82, bob: 0.7,  spin: 0.6  },
-            { x: 0,  y: 0.34,  z: -0.15, roll: 0.05,  pitch: 0.06, scale: 0.58, bob: 0.35, spin: 1.15 },
-            { x: 0,  y: -0.05, z: -0.55, roll: -0.5,  pitch: 0.1,  scale: 0.92, bob: 0.18, spin: 1.62 },
-            { x: 0,  y: 0.30,  z: -0.1,  roll: -0.22, pitch: 0,    scale: 0.6,  bob: 0.5,  spin: 2.1  },
-            { x: 0,  y: 0.12,  z: -0.3,  roll: -0.4,  pitch: 0,    scale: 0.5,  bob: 1,    spin: 2.75 },
-            { x: 0,  y: 0.46,  z: 0,     roll: -0.2,  pitch: 0,    scale: 0.36, bob: 1,    spin: 3.1  },
+            { x: 0, y: -0.10, z: -0.35, roll: -0.26, pitch: 0.03, scale: 0.84, bob: 0.7,  spin: 0.5  },
+            { x: 0, y: 0.30,  z: -0.35, roll: -0.02, pitch: 0.05, scale: 0.60, bob: 0.35, spin: 0.5  },
+            { x: 0, y: -0.05, z: -0.5,  roll: -0.48, pitch: 0.08, scale: 0.92, bob: 0.18, spin: 0.85 },
+            { x: 0, y: 0.26,  z: -0.5,  roll: -0.24, pitch: 0,    scale: 0.62, bob: 0.5,  spin: 0.85 },
+            { x: 0, y: 0.12,  z: -0.3,  roll: -0.38, pitch: 0,    scale: 0.50, bob: 1,    spin: 1.1  },
+            { x: 0, y: 0.44,  z: 0,     roll: -0.22, pitch: 0,    scale: 0.36, bob: 1,    spin: 1.25 },
         ]
         : [
-            { x: -0.13, y: 0,     z: -0.45, roll: -0.2,  pitch: 0,    scale: 0.94, bob: 0.65, spin: 0.6  },
-            { x: 0.27,  y: 0.05,  z: 0.08,  roll: 0,     pitch: 0.05, scale: 0.84, bob: 0.65, spin: 1.15 },
-            { x: 0.02,  y: -0.14, z: -0.52, roll: -0.55, pitch: 0.1,  scale: 0.98, bob: 0.18, spin: 1.62 },
-            { x: -0.06, y: 0.02,  z: 0.06,  roll: -0.28, pitch: 0,    scale: 0.88, bob: 0.5,  spin: 2.1  },
-            { x: 0,     y: 0.2,   z: -0.34, roll: -0.46, pitch: 0,    scale: 0.62, bob: 1,    spin: 2.75 },
-            { x: 0,     y: 0.5,   z: 0,     roll: -0.24, pitch: 0,    scale: 0.42, bob: 1,    spin: 3.1  },
+            { x: -0.10, y: 0,     z: -0.35, roll: -0.20, pitch: 0,    scale: 0.94, bob: 0.65, spin: 0.5  },
+            { x: 0.24,  y: 0.04,  z: -0.35, roll: -0.04, pitch: 0.04, scale: 0.86, bob: 0.65, spin: 0.5  },
+            { x: 0.02,  y: -0.12, z: -0.46, roll: -0.50, pitch: 0.08, scale: 0.98, bob: 0.18, spin: 0.85 },
+            { x: -0.04, y: 0.02,  z: -0.22, roll: -0.28, pitch: 0,    scale: 0.88, bob: 0.5,  spin: 0.85 },
+            { x: 0,     y: 0.18,  z: -0.32, roll: -0.40, pitch: 0,    scale: 0.62, bob: 1,    spin: 1.1  },
+            { x: 0,     y: 0.46,  z: 0,     roll: -0.24, pitch: 0,    scale: 0.42, bob: 1,    spin: 1.25 },
         ];
 
     const zoom = isMobile
