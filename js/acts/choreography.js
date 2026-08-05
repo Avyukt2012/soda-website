@@ -31,7 +31,7 @@ export function initChoreography() {
             end: 'bottom bottom',
             scrub: SCRUB,
         },
-        defaults: { duration: 1, ease: 'power2.inOut' },
+        defaults: { duration: 1, ease: 'sine.inOut' },
     });
 
     const step = isMobile
@@ -44,11 +44,11 @@ export function initChoreography() {
             { x: 0,  y: 0.46,  z: 0,     roll: -0.2,  pitch: 0,    scale: 0.36, bob: 1,    spin: 3.1  },
         ]
         : [
-            { x: -0.42, y: 0,     z: -0.3,  roll: -0.2,  pitch: 0,    scale: 0.94, bob: 0.65, spin: 0.6  },
-            { x: 0.5,   y: 0.04,  z: 0,     roll: 0,     pitch: 0.05, scale: 0.86, bob: 0.65, spin: 1.15 },
-            { x: 0,     y: -0.14, z: -0.22, roll: -0.55, pitch: 0.1,  scale: 0.96, bob: 0.18, spin: 1.62 },
-            { x: -0.12, y: 0.02,  z: 0,     roll: -0.28, pitch: 0,    scale: 0.9,  bob: 0.5,  spin: 2.1  },
-            { x: 0,     y: 0.2,   z: -0.18, roll: -0.46, pitch: 0,    scale: 0.62, bob: 1,    spin: 2.75 },
+            { x: -0.13, y: 0,     z: -0.45, roll: -0.2,  pitch: 0,    scale: 0.94, bob: 0.65, spin: 0.6  },
+            { x: 0.27,  y: 0.05,  z: 0.08,  roll: 0,     pitch: 0.05, scale: 0.84, bob: 0.65, spin: 1.15 },
+            { x: 0.02,  y: -0.14, z: -0.52, roll: -0.55, pitch: 0.1,  scale: 0.98, bob: 0.18, spin: 1.62 },
+            { x: -0.06, y: 0.02,  z: 0.06,  roll: -0.28, pitch: 0,    scale: 0.88, bob: 0.5,  spin: 2.1  },
+            { x: 0,     y: 0.2,   z: -0.34, roll: -0.46, pitch: 0,    scale: 0.62, bob: 1,    spin: 2.75 },
             { x: 0,     y: 0.5,   z: 0,     roll: -0.24, pitch: 0,    scale: 0.42, bob: 1,    spin: 3.1  },
         ];
 
