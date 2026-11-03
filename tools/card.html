@@ -65,7 +65,7 @@ pose.rotation.set(0.17, -0.1, -0.23, 'ZXY');
 scene.add(pose);
 
 const camera = new THREE.PerspectiveCamera(22, 1, 0.01, 10);
-camera.position.z = (height * 1.09) / (2 * Math.tan(THREE.MathUtils.degToRad(11)));
+camera.position.z = (height * 1.275) / (2 * Math.tan(THREE.MathUtils.degToRad(11)));
 
 renderer.render(scene, camera);
 requestAnimationFrame(() => requestAnimationFrame(() => {
