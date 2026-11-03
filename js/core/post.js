@@ -214,6 +214,13 @@ onFrame((delta, elapsed) => {
     grainPass.uniforms.uTime.value = elapsed;
 });
 
+export function compileForComposer(target = scene) {
+    renderer.setRenderTarget(composer.renderTarget1);
+    const compiled = renderer.compileAsync(target, camera, scene);
+    renderer.setRenderTarget(null);
+    return compiled;
+}
+
 renderer.info.autoReset = false;
 
 export function renderPost() {

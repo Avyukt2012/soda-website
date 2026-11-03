@@ -2,18 +2,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 
 export function createLoader() {
-    const el = document.createElement('div');
-    el.className = 'loader';
-    el.innerHTML = `
-        <div class="loader__inner">
-            <span class="loader__mark">Soda</span>
-            <span class="loader__count"><em>0</em><i>%</i></span>
-        </div>
-        <div class="loader__bar"><span></span></div>
-        <div class="loader__curtain"></div>
-    `;
-    document.body.appendChild(el);
-
+    const el = document.querySelector('.loader');
     const countEl = el.querySelector('.loader__count em');
     const barEl = el.querySelector('.loader__bar span');
     const shown = { value: 0 };
@@ -41,6 +30,7 @@ export function createLoader() {
 
     return {
         finish() {
+            THREE.DefaultLoadingManager.onProgress = undefined;
             return new Promise((resolve) => {
                 gsap.timeline({ onComplete: () => { el.remove(); resolve(); } })
                     .to(shown, { value: 100, duration: 0.45, ease: 'power2.out', onUpdate: paint })

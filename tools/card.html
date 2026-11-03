@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html, body { margin: 0; background: transparent; } canvas { display: block; }</style>
+<script type="importmap">
+{
+    "imports": {
+        "three": "../vendor/three-0.170.0/three.module.min.js",
+        "addons": "../vendor/three-0.170.0/addons.min.js"
+    }
+}
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader, DRACOLoader, RoomEnvironment } from 'addons';
+
+const SIZE = innerWidth;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setSize(SIZE, SIZE);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(2.5, 3.5, 3);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xbfe9ff, 0.9);
+rim.position.set(-3, 1.5, -2.5);
+scene.add(rim);
+
+const draco = new DRACOLoader();
+draco.setDecoderPath('../vendor/three-0.170.0/draco/');
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(draco);
+
+const [gltf, map] = await Promise.all([
+    gltfLoader.loadAsync('../assets/can.glb'),
+    new THREE.TextureLoader().loadAsync(new URLSearchParams(location.search).get('texture')),
+]);
+map.flipY = false;
+map.colorSpace = THREE.SRGBColorSpace;
+map.anisotropy = 16;
+
+const model = gltf.scene;
+model.traverse((child) => {
+    if (!child.isMesh) return;
+    child.material.map = map;
+    child.material.needsUpdate = true;
+});
+const box = new THREE.Box3().setFromObject(model);
+const center = box.getCenter(new THREE.Vector3());
+const height = box.getSize(new THREE.Vector3()).y;
+model.position.sub(center);
+
+const pose = new THREE.Group();
+pose.add(model);
+pose.rotation.set(0.17, -0.1, -0.23, 'ZXY');
+scene.add(pose);
+
+const camera = new THREE.PerspectiveCamera(22, 1, 0.01, 10);
+camera.position.z = (height * 1.09) / (2 * Math.tan(THREE.MathUtils.degToRad(11)));
+
+renderer.render(scene, camera);
+requestAnimationFrame(() => requestAnimationFrame(() => {
+    renderer.render(scene, camera);
+    window.cardReady = true;
+}));
+</script>
+</body>
+</html>

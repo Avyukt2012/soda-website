@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap">
+<style>
+    @font-face { font-family: 'Galada'; src: url('../assets/fonts/galada-latin.woff2') format('woff2'); }
+    html, body { margin: 0; background: transparent; }
+    svg { display: block; }
+    text { font-family: 'Switzer', sans-serif; }
+    .script { font-family: 'Galada', cursive; }
+    .layer-surface .art { visibility: hidden; }
+    .layer-surface .ink, .layer-surface .ink * { visibility: visible; fill: rgb(255, 92, 120) !important; stroke: none !important; }
+</style>
+</head>
+<body>
+<script>
+const WRAP = 1876;
+const FRONT = 1407;
+const BACK = 469;
+const SIDE = 938;
+const BODY_HEIGHT = 837;
+const TO_TEXTURE = 'matrix(0 -1 1.2 0 190 2046)';
+const LABEL_EDGE = 1194;
+const METAL = 'rgb(228, 228, 228)';
+const SURFACE_LABEL = 'rgb(255, 76, 255)';
+const SURFACE_METAL = 'rgb(255, 86, 255)';
+const NECK_PATCH = '0,0 216,0 200,12 180,36 160,61 140,83 120,104 100,118 80,128 60,134 40,144 20,164 0,165';
+
+const COLOURWAYS = {
+    classic: {
+        top: '#3cbc75', base: '#33ae68', low: '#279a59', deep: '#0b5b3a', tide: '#1f8a4d',
+        ink: '#011d17', flavour: 'CLASSIC CHERRY', extract: 'Cherry extract',
+    },
+    blue: {
+        top: '#1369b6', base: '#0d5ca2', low: '#0a4f8e', deep: '#062f5c', tide: '#084582',
+        ink: '#04172b', flavour: 'ZERO LIME', extract: 'Lime and blueberry extract',
+    },
+};
+
+const params = new URLSearchParams(location.search);
+const flavour = params.get('flavour') ?? 'classic';
+const layer = params.get('layer') ?? 'colour';
+const c = COLOURWAYS[flavour];
+const ACCENT = '#fbcfe8';
+
+const seeded = (seed) => () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+function bubbles() {
+    const random = seeded(2025);
+    let out = '';
+    for (let i = 0; i < 150; i++) {
+        const depth = Math.pow(random(), 0.62);
+        const y = BODY_HEIGHT * (0.08 + depth * 0.92);
+        const r = 5 + Math.pow(random(), 2.4) * 34 * (0.45 + depth * 0.75);
+        const x = random() * WRAP;
+        if (x - r < 6 || x + r > WRAP - 6) continue;
+        const stroke = (0.14 + depth * 0.3).toFixed(2);
+        const fill = (0.02 + depth * 0.05).toFixed(3);
+        out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff" fill-opacity="${fill}" stroke="#fff" stroke-opacity="${stroke}" stroke-width="${(1.6 + r * 0.05).toFixed(2)}"/>`;
+    }
+    return out;
+}
+
+function tide(level, swing, waves, phase) {
+    let d = `M0 ${BODY_HEIGHT + 40} L0 ${level}`;
+    for (let x = 0; x <= WRAP; x += 8) {
+        const y = level + Math.sin((x / WRAP) * Math.PI * 2 * waves + phase) * swing
+            + Math.sin((x / WRAP) * Math.PI * 2 * (waves * 2 + 1) + phase * 1.7) * swing * 0.35;
+        d += ` L${x} ${y.toFixed(1)}`;
+    }
+    return `${d} L${WRAP} ${BODY_HEIGHT + 40} Z`;
+}
+
+const plusMark = (x, y, r, weight, colour) => `
+    <g fill="none" stroke="${colour}" stroke-width="${weight}" stroke-linecap="round">
+        <circle cx="${x}" cy="${y}" r="${r}"/>
+        <path d="M${x} ${y - r * 0.42}V${y + r * 0.42}M${x - r * 0.42} ${y}H${x + r * 0.42}"/>
+    </g>`;
+
+function cherry(x, y, r, id) {
+    return `
+    <radialGradient id="${id}" cx="0.36" cy="0.32" r="0.78">
+        <stop offset="0" stop-color="#ff6a58"/><stop offset="0.42" stop-color="#e01b2b"/><stop offset="1" stop-color="#7d0413"/>
+    </radialGradient>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="url(#${id})"/>
+    <path d="M${x - r * 0.24} ${y - r * 0.94}Q${x} ${y - r * 0.68} ${x + r * 0.24} ${y - r * 0.94}" fill="none" stroke="#5b0410" stroke-width="${r * 0.09}" stroke-linecap="round"/>
+    <ellipse cx="${x - r * 0.38}" cy="${y - r * 0.38}" rx="${r * 0.2}" ry="${r * 0.13}" transform="rotate(-34 ${x - r * 0.38} ${y - r * 0.38})" fill="#fff" fill-opacity="0.82"/>`;
+}
+
+const fruitClassic = (x, y) => `
+    <g transform="translate(${x} ${y}) scale(0.76) translate(${-x} ${-y})">
+        <path d="M${x - 58} ${y + 18}C${x - 44} ${y - 50} ${x + 6} ${y - 98} ${x + 62} ${y - 122}" fill="none" stroke="${c.deep}" stroke-width="9" stroke-linecap="round"/>
+        <path d="M${x + 58} ${y + 34}C${x + 62} ${y - 30} ${x + 62} ${y - 80} ${x + 62} ${y - 122}" fill="none" stroke="${c.deep}" stroke-width="9" stroke-linecap="round"/>
+        <path d="M${x + 62} ${y - 122}C${x + 104} ${y - 176} ${x + 176} ${y - 170} ${x + 214} ${y - 126}C${x + 170} ${y - 88} ${x + 104} ${y - 88} ${x + 62} ${y - 122}Z" fill="${c.deep}"/>
+        <path d="M${x + 72} ${y - 122}C${x + 112} ${y - 134} ${x + 158} ${y - 134} ${x + 200} ${y - 126}" fill="none" stroke="#fff" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
+        ${cherry(x - 62, y + 74, 82, 'cherryA')}
+        ${cherry(x + 62, y + 96, 76, 'cherryB')}
+    </g>`;
+
+function blueberry(x, y, r, id) {
+    let crown = '';
+    for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2 - 0.5;
+        crown += `<path d="M${x + r * 0.2} ${y - r * 0.26}l${Math.cos(a) * r * 0.27} ${Math.sin(a) * r * 0.27}" stroke="#141a4d" stroke-width="${r * 0.11}" stroke-linecap="round"/>`;
+    }
+    return `
+    <radialGradient id="${id}" cx="0.34" cy="0.3" r="0.82">
+        <stop offset="0" stop-color="#a9b9f4"/><stop offset="0.45" stop-color="#4a56bd"/><stop offset="1" stop-color="#1a1f63"/>
+    </radialGradient>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="url(#${id})"/>
+    <circle cx="${x + r * 0.2}" cy="${y - r * 0.26}" r="${r * 0.2}" fill="#20265e"/>
+    ${crown}`;
+}
+
+function limeWheel(x, y, r) {
+    let flesh = '';
+    for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const b = a + (Math.PI * 2) / 8 - 0.09;
+        const inner = r * 0.13;
+        const outer = r * 0.78;
+        flesh += `<path d="M${x + Math.cos(a + 0.045) * inner} ${y + Math.sin(a + 0.045) * inner}L${x + Math.cos(a + 0.045) * outer} ${y + Math.sin(a + 0.045) * outer}A${outer} ${outer} 0 0 1 ${x + Math.cos(b) * outer} ${y + Math.sin(b) * outer}Z" fill="#c6ee4c"/>`;
+    }
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="#6fbb2a"/><circle cx="${x}" cy="${y}" r="${r * 0.86}" fill="#f1fbcf"/>${flesh}`;
+}
+
+const fruitBlue = (x, y) => `
+    <g transform="translate(${x} ${y}) scale(0.72) translate(${-x} ${-y})">
+        ${limeWheel(x + 62, y - 44, 112)}
+        ${blueberry(x - 66, y + 66, 82, 'berryA')}
+        ${blueberry(x + 66, y + 104, 66, 'berryB')}
+    </g>`;
+
+const row = (x, y, width, index, name) => `
+    <path d="M${x} ${y + 17}H${x + width}" stroke="${c.ink}" stroke-opacity="0.22" stroke-width="2"/>
+    <text x="${x}" y="${y}" font-size="23" font-weight="700" fill="${c.ink}" fill-opacity="0.55" letter-spacing="1.5">${index}</text>
+    <text x="${x + 46}" y="${y}" font-size="31" font-weight="600" fill="${c.ink}">${name}</text>`;
+
+function barcode(x, y, width, height) {
+    const random = seeded(flavour === 'blue' ? 41 : 17);
+    let cursor = x;
+    let out = '';
+    while (cursor < x + width) {
+        const bar = Math.min(2 + Math.floor(random() * 3) * 2, x + width - cursor);
+        const gap = 2 + Math.floor(random() * 3) * 2;
+        out += `<rect x="${cursor}" y="${y}" width="${bar}" height="${height}" fill="${c.ink}"/>`;
+        cursor += bar + gap;
+    }
+    return out;
+}
+
+const recycle = (x, y, r) => `
+    <g fill="none" stroke="#fff" stroke-width="${r * 0.2}" stroke-linecap="round">
+        <path d="M${x - r} ${y}A${r} ${r} 0 0 1 ${x + r * 0.5} ${y - r * 0.87}"/>
+        <path d="M${x + r} ${y}A${r} ${r} 0 0 1 ${x - r * 0.5} ${y + r * 0.87}"/>
+    </g>
+    <path d="M${x + r * 0.34} ${y - r * 1.24}L${x + r * 0.98} ${y - r * 0.8}L${x + r * 0.26} ${y - r * 0.46}Z" fill="#fff"/>
+    <path d="M${x - r * 0.34} ${y + r * 1.24}L${x - r * 0.98} ${y + r * 0.8}L${x - r * 0.26} ${y + r * 0.46}Z" fill="#fff"/>`;
+
+const shoulderLine = (x) => `
+    <text class="ink" x="${x}" y="-58" text-anchor="middle" font-size="26" font-weight="700" fill="#fff" letter-spacing="5.5">ZERO SUGAR &#183; FOUR THINGS &#183; NOTHING TO HIDE</text>`;
+
+const front = () => `
+    ${plusMark(FRONT - 208, 150, 36, 7, '#fff')}
+    <text x="${FRONT - 150}" y="172" font-size="60" font-weight="800" fill="#fff" letter-spacing="24">DIET</text>
+    <g transform="rotate(-7 ${FRONT} 400)">
+        <text class="script" x="${FRONT + 6}" y="526" text-anchor="middle" font-size="316" fill="${c.deep}" fill-opacity="0.4">Soda</text>
+        <text class="script" x="${FRONT}" y="520" text-anchor="middle" font-size="316" fill="#fff">Soda</text>
+        <path d="M${FRONT - 286} 572C${FRONT - 120} 544 ${FRONT + 110} 540 ${FRONT + 300} 566C${FRONT + 110} 560 ${FRONT - 104} 564 ${FRONT - 286} 572Z" fill="${ACCENT}"/>
+    </g>
+    ${flavour === 'blue' ? fruitBlue(FRONT + 196, 150) : fruitClassic(FRONT + 186, 150)}
+    <rect x="${FRONT - 196}" y="616" width="392" height="66" rx="33" fill="${ACCENT}"/>
+    <text x="${FRONT}" y="661" text-anchor="middle" font-size="30" font-weight="800" fill="${c.ink}" letter-spacing="4.5">${c.flavour}</text>
+    <text class="ink" x="${FRONT}" y="757" text-anchor="middle" font-size="40" font-weight="800" fill="#fff" letter-spacing="1">330 ml</text>
+    <text class="ink" x="${FRONT}" y="794" text-anchor="middle" font-size="20" font-weight="600" fill="#fff" letter-spacing="3.5">ZERO SUGAR CARBONATED SOFT DRINK</text>`;
+
+const back = () => `
+    <rect class="ink" x="${BACK - 300}" y="46" width="600" height="500" rx="34" fill="#fff"/>
+    <text class="script" x="${BACK - 256}" y="136" font-size="80" fill="${c.ink}">Four things</text>
+    ${row(BACK - 256, 210, 512, '01', 'Carbonated water')}
+    ${row(BACK - 256, 274, 512, '02', 'Kola nut')}
+    ${row(BACK - 256, 338, 512, '03', c.extract)}
+    ${row(BACK - 256, 402, 512, '04', 'Citrus leaf')}
+    <text x="${BACK - 256}" y="494" font-size="42" font-weight="800" fill="${c.ink}">0 g sugar</text>
+    <text x="${BACK + 256}" y="494" text-anchor="end" font-size="28" font-weight="600" fill="${c.ink}">330 ml</text>
+    <text class="ink" x="${BACK - 300}" y="600" font-size="23" font-weight="700" fill="#fff" letter-spacing="2">IT COMES BACK</text>
+    <text class="ink" x="${BACK - 300}" y="636" font-size="21" font-weight="500" fill="#fff">Aluminium is infinitely recyclable.</text>
+    <text class="ink" x="${BACK - 300}" y="666" font-size="21" font-weight="500" fill="#fff">This can returns to a shelf in sixty days.</text>
+    ${recycle(BACK - 268, 738, 26)}
+    <text class="ink" x="${BACK - 222}" y="732" font-size="20" font-weight="600" fill="#fff">Diet Soda is a concept brand.</text>
+    <text class="ink" x="${BACK - 222}" y="760" font-size="20" font-weight="600" fill="#fff">Designed as a demo, not for sale.</text>
+    <rect class="ink" x="${BACK + 150}" y="586" width="150" height="196" rx="12" fill="#fff"/>
+    ${barcode(BACK + 162, 600, 126, 168)}`;
+
+const side = () => `
+    <g transform="rotate(-90 ${SIDE} 418)">
+        <text class="script" x="${SIDE}" y="474" text-anchor="middle" font-size="164" fill="#fff" fill-opacity="0.14">Pure Zero</text>
+    </g>`;
+
+document.body.className = `layer-${layer}`;
+document.body.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 2048 2048">
+    <defs>
+        <linearGradient id="wash" x1="0" y1="-180" x2="0" y2="${BODY_HEIGHT}" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="${c.top}"/><stop offset="0.55" stop-color="${c.base}"/><stop offset="1" stop-color="${c.low}"/>
+        </linearGradient>
+    </defs>
+    ${layer === 'surface' ? `<rect width="2048" height="2048" fill="${SURFACE_METAL}"/><rect width="${LABEL_EDGE}" height="2048" fill="${SURFACE_LABEL}"/>` : `<rect width="2048" height="2048" fill="${METAL}"/>`}
+    <clipPath id="label"><rect width="${LABEL_EDGE}" height="2048"/></clipPath>
+    <g clip-path="url(#label)">
+        <g transform="${TO_TEXTURE}">
+            <g class="art">
+                <rect x="-200" y="-260" width="${WRAP + 400}" height="${BODY_HEIGHT + 400}" fill="url(#wash)"/>
+                <path d="${tide(690, 20, 3, 0.6)}" fill="${c.tide}" fill-opacity="0.55"/>
+                <path d="${tide(742, 15, 4, 2.4)}" fill="${c.deep}" fill-opacity="0.32"/>
+                ${bubbles()}
+                ${side()}
+                ${back()}
+                ${front()}
+                ${shoulderLine(FRONT)}
+                ${shoulderLine(BACK)}
+            </g>
+        </g>
+    </g>
+    <polygon points="${NECK_PATCH}" fill="${layer === 'surface' ? SURFACE_METAL : METAL}"/>
+</svg>`;
+window.labelReady = document.fonts.ready.then(() => Promise.all([
+    document.fonts.load('400px Galada', 'Soda'),
+    ...[500, 600, 700, 800].map((weight) => document.fonts.load(`${weight} 30px Switzer`, 'A')),
+]));
+</script>
+</body>
+</html>

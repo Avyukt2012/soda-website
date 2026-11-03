@@ -13,11 +13,30 @@
     <meta property="og:image" content="assets/card-green.png">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23011411'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23fbcfe8' stroke-width='1.6'/%3E%3Cpath d='M12 8v8M8 12h8' stroke='%23fbcfe8' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script>
+        window.dropLoader = () => document.querySelector('.loader')?.remove();
+        addEventListener('error', window.dropLoader);
+        document.documentElement.dataset.theme = localStorage.getItem('soda-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        if (!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+            [
+                'assets/can.glb',
+                'assets/cherry.glb',
+                'assets/leaves.glb',
+                `assets/tex-green-${matchMedia('(max-width: 900px)').matches ? 1024 : 2048}.webp`,
+                'vendor/three-0.170.0/draco/draco_wasm_wrapper.js',
+                'vendor/three-0.170.0/draco/draco_decoder.wasm',
+            ].forEach((href) => document.head.append(Object.assign(document.createElement('link'), {
+                rel: 'preload',
+                as: 'fetch',
+                crossOrigin: 'anonymous',
+                href,
+            })));
+        }
+    </script>
+    <noscript><style>.loader { display: none !important; }</style></noscript>
+    <link rel="preconnect" href="https://api.fontshare.com">
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Galada&display=swap" rel="stylesheet">
-    <link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap" rel="stylesheet">
+    <link id="switzer" rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/hero.css">
     <link rel="stylesheet" href="css/acts.css">
@@ -26,19 +45,39 @@
     <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/",
-        "gsap": "https://esm.sh/gsap@3.13.0",
-        "gsap/ScrollTrigger": "https://esm.sh/gsap@3.13.0/ScrollTrigger",
-        "gsap/SplitText": "https://esm.sh/gsap@3.13.0/SplitText",
-        "gsap/DrawSVGPlugin": "https://esm.sh/gsap@3.13.0/DrawSVGPlugin",
-        "lenis": "https://unpkg.com/lenis@1.1.0/dist/lenis.mjs"
+        "three": "./vendor/three-0.170.0/three.module.min.js",
+        "three/addons/loaders/GLTFLoader.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/loaders/DRACOLoader.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/postprocessing/EffectComposer.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/postprocessing/RenderPass.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/postprocessing/ShaderPass.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/postprocessing/UnrealBloomPass.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/postprocessing/OutputPass.js": "./vendor/three-0.170.0/addons.min.js",
+        "three/addons/environments/RoomEnvironment.js": "./vendor/three-0.170.0/addons.min.js",
+        "gsap": "./vendor/gsap-3.13.0/gsap.mjs",
+        "gsap/ScrollTrigger": "./vendor/gsap-3.13.0/ScrollTrigger.mjs",
+        "gsap/SplitText": "./vendor/gsap-3.13.0/SplitText.mjs",
+        "gsap/DrawSVGPlugin": "./vendor/gsap-3.13.0/DrawSVGPlugin.mjs",
+        "lenis": "./vendor/lenis-1.1.0/lenis.mjs"
       }
     }
     </script>
+    <link rel="modulepreload" href="vendor/three-0.170.0/three.module.min.js">
+    <link rel="modulepreload" href="vendor/three-0.170.0/addons.min.js">
+    <link rel="modulepreload" href="vendor/gsap-3.13.0/gsap.mjs">
+    <link rel="modulepreload" href="vendor/gsap-3.13.0/ScrollTrigger.mjs">
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/galada-latin.woff2" crossorigin>
 </head>
 
 <body>
+    <div class="loader">
+        <div class="loader__inner">
+            <span class="loader__mark">Soda</span>
+            <span class="loader__count"><em>0</em><i>%</i></span>
+        </div>
+        <div class="loader__bar"><span></span></div>
+        <div class="loader__curtain"></div>
+    </div>
     <canvas id="gl"></canvas>
     <div id="bubbles-container"></div>
 
@@ -97,14 +136,14 @@
                     <div class="product-carousel">
                         <div class="carousel-cards">
                             <div class="card active" data-flavor="classic" data-cursor="Pick">
-                                <img src="assets/card-green.png" alt="Diet Classic">
+                                <img src="assets/card-green.webp" width="420" height="420" alt="Diet Classic">
                                 <div class="card-info">
                                     <span>Diet Classic</span>
                                     <span>$2.99</span>
                                 </div>
                             </div>
                             <div class="card" data-flavor="blue" data-cursor="Pick">
-                                <img src="assets/card-blue.png" alt="Zero Lime" style="filter: brightness(0.7);">
+                                <img src="assets/card-blue.webp" width="420" height="420" alt="Zero Lime" style="filter: brightness(0.7);">
                                 <div class="card-info">
                                     <span>Zero Lime</span>
                                     <span>$2.99</span>
@@ -139,7 +178,7 @@
                     <div class="anatomy-copy">
                         <p class="eyebrow" data-fade>Ingredients</p>
                         <h2 class="act-title" data-split>Four<br>things</h2>
-                        <p class="act-lede" data-fade>Carbonated water, real guaraná, natural cherry
+                        <p class="act-lede" data-fade>Carbonated water, real kola nut, natural cherry
                             extract, a whisper of citrus leaf. That is the entire list.</p>
                     </div>
                     <div class="anatomy-label" data-label="cherry" style="top: 20%; left: 79%;">
@@ -151,13 +190,13 @@
                             <span class="anatomy-label__note">COLD PRESSED · 0g SUGAR</span>
                         </span>
                     </div>
-                    <div class="anatomy-label" data-label="guarana" style="top: 34%; left: 79%;">
+                    <div class="anatomy-label" data-label="kola" style="top: 34%; left: 79%;">
                         <svg class="anatomy-label__line" viewBox="0 0 84 1" preserveAspectRatio="none">
                             <path d="M0 0.5 H84" />
                         </svg>
                         <span class="anatomy-label__text">
-                            <span class="anatomy-label__name">Real guaran&aacute;</span>
-                            <span class="anatomy-label__note">AMAZON GROWN &middot; NATURAL CAFFEINE</span>
+                            <span class="anatomy-label__name">Real kola nut</span>
+                            <span class="anatomy-label__note">SUN DRIED &middot; NATURAL CAFFEINE</span>
                         </span>
                     </div>
                     <div class="anatomy-label" data-label="leaf" style="top: 48%; left: 79%;">
@@ -198,7 +237,7 @@
                         <span class="flavour-panel__index">01 / 02</span>
                         <h2 class="flavour-panel__name">Diet Classic</h2>
                         <div class="flavour-panel__notes">
-                            <span>DEEP CHERRY</span><span>GUARANÁ</span><span>DRY FINISH</span>
+                            <span>DEEP CHERRY</span><span>KOLA NUT</span><span>DRY FINISH</span>
                         </div>
                     </article>
                     <article class="flavour-panel" data-flavour="blue">
@@ -280,7 +319,7 @@
         <span class="scroll-cue__rail"></span>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js" onerror="dropLoader()"></script>
 </body>
 
 </html>

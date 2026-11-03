@@ -33,10 +33,8 @@ export const canScroll = {
     dim: 1,
 };
 
-let baseMaterials = [];
 let allMaterials = [];
 let framed = null;
-let warmedTextures = false;
 
 function currentFill() {
     return matchMedia('(max-width: 900px)').matches ? 0.4 : 0.71;
@@ -54,7 +52,10 @@ window.addEventListener('resize', applyFraming);
 const textures = {};
 
 export async function initCan() {
-    const gltf = await loadModel(ASSETS.can);
+    const [gltf, classic] = await Promise.all([
+        loadModel(ASSETS.can),
+        loadTexture(ASSETS.texGreen),
+    ]);
     const model = gltf.scene;
 
     const box = new THREE.Box3().setFromObject(model);
@@ -73,43 +74,25 @@ export async function initCan() {
     canRig.rotation.z = STAGE.roll;
 
     allMaterials = collectMeshes(model).map((m) => m.material).filter(Boolean);
-    allMaterials.forEach((m) => { m.transparent = true; });
-
-    baseMaterials = allMaterials.filter((m) => m.map);
-
-    const [green, blue] = await Promise.all([
-        loadTexture(ASSETS.texGreen),
-        loadTexture(ASSETS.texBlue),
-    ]);
-    textures.classic = green;
-    textures.blue = blue;
-
-    for (const mat of baseMaterials) {
-        mat.map = green;
-        mat.needsUpdate = true;
-    }
-    warmedTextures = true;
+    allMaterials.forEach((m) => {
+        m.transparent = true;
+        m.map = classic;
+        m.needsUpdate = true;
+    });
+    textures.classic = classic;
 
     return model;
+}
+
+export async function loadBlueLabel() {
+    textures.blue = await loadTexture(ASSETS.texBlue);
+    return textures.blue;
 }
 
 export function setFlavorTexture(flavor) {
     const tex = textures[flavor];
     if (!tex) return;
-    for (const mat of baseMaterials) {
-        mat.map = tex;
-        if (!warmedTextures) mat.needsUpdate = true;
-    }
-}
-
-export function warmCanTextures() {
-    if (!textures.blue) return;
-    for (const mat of baseMaterials) mat.map = textures.blue;
-}
-
-export function settleCanTexture() {
-    if (!textures.classic) return;
-    for (const mat of baseMaterials) mat.map = textures.classic;
+    for (const mat of allMaterials) mat.map = tex;
 }
 
 export function setSpin(radians) {

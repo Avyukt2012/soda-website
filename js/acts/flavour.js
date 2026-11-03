@@ -1,12 +1,14 @@
 import { gsap, ScrollTrigger, SCRUB } from '../scroll/smooth.js';
 import { setFlavorTexture, setFlavourSpin, canScroll } from '../core/can.js';
 import { setBerryFlavor } from '../core/berries.js';
+import { flavorReady } from '../core/blue.js';
 import { setBackgroundFlavor } from '../core/background.js';
 import { liquidPass } from '../core/post.js';
 import { FLAVORS, isMobile } from '../config.js';
 
 const ORDER = ['classic', 'blue'];
 let current = 'classic';
+let requested = 'classic';
 let switching = false;
 
 const listeners = new Set();
@@ -14,13 +16,29 @@ export function onFlavorChange(fn) { listeners.add(fn); }
 
 export function getFlavor() { return current; }
 
-export function applyFlavor(flavor, { instant = false } = {}) {
-    if (!FLAVORS[flavor] || flavor === current) return;
-    current = flavor;
-
+function markActiveCard(flavor) {
     document.querySelectorAll('.card').forEach((c) => {
         c.classList.toggle('active', c.dataset.flavor === flavor);
     });
+}
+
+export function applyFlavor(flavor, options) {
+    if (!FLAVORS[flavor] || flavor === requested) return;
+    requested = flavor;
+    markActiveCard(flavor);
+
+    flavorReady(flavor).then(() => {
+        if (flavor === requested) switchFlavor(flavor, options);
+    }, () => {
+        if (flavor !== requested) return;
+        requested = current;
+        markActiveCard(current);
+    });
+}
+
+function switchFlavor(flavor, { instant = false } = {}) {
+    if (flavor === current) return;
+    current = flavor;
 
     setBackgroundFlavor(flavor, instant ? 0 : 1.25, instant ? null : gsap);
 
@@ -72,7 +90,7 @@ export function initFlavour() {
     document.querySelectorAll('.nav-arrow').forEach((btn) => {
         btn.addEventListener('click', () => {
             const dir = Number(btn.dataset.dir) || 1;
-            const next = ORDER[(ORDER.indexOf(current) + dir + ORDER.length) % ORDER.length];
+            const next = ORDER[(ORDER.indexOf(requested) + dir + ORDER.length) % ORDER.length];
             applyFlavor(next);
         });
     });

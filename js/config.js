@@ -1,15 +1,17 @@
 const BASE = 'assets';
 
+export const isMobile = matchMedia('(max-width: 900px)').matches;
+
+const LABEL_SIZE = isMobile ? 1024 : 2048;
+
 export const ASSETS = {
     can: `${BASE}/can.glb`,
     cherry: `${BASE}/cherry.glb`,
     blueberry: `${BASE}/blueberry.glb`,
     leaves: `${BASE}/leaves.glb`,
-    texGreen: `${BASE}/tex-green.jpg`,
-    texBlue: `${BASE}/tex-blue.jpg`,
+    texGreen: `${BASE}/tex-green-${LABEL_SIZE}.webp`,
+    texBlue: `${BASE}/tex-blue-${LABEL_SIZE}.webp`,
     bubble: `${BASE}/bubble.png`,
-    cardGreen: `${BASE}/card-green.png`,
-    cardBlue: `${BASE}/card-blue.png`,
 };
 
 export const FLAVORS = {
@@ -54,5 +56,3 @@ export const MOTION = {
     bobAmplitude: 0.075,
     bobPeriod: 6,
 };
-
-export const isMobile = matchMedia('(max-width: 900px)').matches;

@@ -1,10 +1,11 @@
-import { renderer, scene, camera } from './core/stage.js';
+import { renderer, scene } from './core/stage.js';
 import './core/background.js';
-import { renderPost, postState, liquidPass } from './core/post.js';
+import { renderPost, postState, compileForComposer } from './core/post.js';
 import { onFrame, start } from './core/loop.js';
-import { initCan, canScroll, canPivot, warmCanTextures, settleCanTexture, setFlavorTexture } from './core/can.js';
-import { initBerries, warmBerries, settleBerries, setBerryFlavor } from './core/berries.js';
+import { initCan, canScroll, canPivot, setFlavorTexture } from './core/can.js';
+import { initBerries, setBerryFlavor } from './core/berries.js';
 import { initLeaves } from './core/leaves.js';
+import { fetchBlue, warmBlue } from './core/blue.js';
 import { setParticleColor, warmParticles } from './core/particles.js';
 import { initBubbles } from './ui/bubbles.js';
 import { createLoader } from './ui/loader.js';
@@ -42,6 +43,8 @@ function initPerfOverlay() {
     });
 }
 
+const LOADER_HOLD_MS = 600;
+
 const TEXTURE_SLOTS = [
     'map', 'normalMap', 'roughnessMap', 'metalnessMap',
     'aoMap', 'emissiveMap', 'alphaMap',
@@ -74,10 +77,35 @@ function primeTextures() {
     return seen.size;
 }
 
+function cardsDecoded() {
+    return Promise.allSettled(
+        [...document.querySelectorAll('.card img')].map((img) => img.decode()),
+    );
+}
+
+async function switzerReady() {
+    const link = document.getElementById('switzer');
+    if (!link.sheet) {
+        await new Promise((resolve) => {
+            link.addEventListener('load', resolve, { once: true });
+            link.addEventListener('error', resolve, { once: true });
+        });
+    }
+    void document.body.offsetHeight;
+    await document.fonts.ready;
+}
+
+function prepareBlueUnderCurtain() {
+    const coveredUntil = performance.now() + LOADER_HOLD_MS;
+    fetchBlue()
+        .then(() => (performance.now() < coveredUntil ? warmBlue() : null))
+        .catch((err) => console.error('[boot] blue flavour failed to load', err));
+}
+
 async function boot() {
+    removeEventListener('error', window.dropLoader);
     const loader = createLoader();
 
-    onFrame(renderPost);
     start();
     initPerfOverlay();
     initCursor();
@@ -88,9 +116,10 @@ async function boot() {
     initTheme();
 
     lenis.stop();
+    renderPost();
 
     try {
-        await Promise.all([initCan(), initBerries(), initLeaves()]);
+        await Promise.all([initCan(), initBerries(initLeaves()), cardsDecoded()]);
     } catch (err) {
         console.error('[boot] scene failed to load', err);
         document.body.dataset.bootError = String(err);
@@ -98,7 +127,7 @@ async function boot() {
     }
 
     try {
-        await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+        await Promise.race([switzerReady(), new Promise((r) => setTimeout(r, 2500))]);
     } catch { /* fall through on fallback metrics rather than block boot */ }
 
     initChoreography();
@@ -116,24 +145,19 @@ async function boot() {
     await nextFrameOrTimeout(250);
 
     postState.fill = 0.001;
-    warmBerries();
     warmParticles();
-    warmCanTextures();
     try {
         await Promise.race([
-            renderer.compileAsync(scene, camera),
+            compileForComposer(),
             new Promise((r) => setTimeout(r, 4000)),
         ]);
-    } catch {
-        try { renderer.compile(scene, camera); } catch { /* non-fatal */ }
-    }
+    } catch { /* first render compiles anything missed */ }
 
     primeTextures();
 
     renderPost();
     postState.fill = 0;
-    settleBerries();
-    settleCanTexture();
+    onFrame(renderPost);
 
     if (new URLSearchParams(location.search).has('debug')) {
         window.__can = canScroll;
@@ -145,9 +169,14 @@ async function boot() {
     document.body.classList.add('is-ready');
     ScrollTrigger.refresh();
 
-    await loader.finish();
+    const curtainLifted = loader.finish();
+    prepareBlueUnderCurtain();
+    await curtainLifted;
     lenis.start();
     initHeroIntro();
 }
 
-boot();
+boot().catch((err) => {
+    console.error('[boot] failed', err);
+    window.dropLoader();
+});

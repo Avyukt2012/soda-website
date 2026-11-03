@@ -69,13 +69,9 @@ function buildInstanced(gltf, key) {
     sets[key] = built;
 }
 
-export async function initBerries() {
-    const [cherry, blueberry] = await Promise.all([
-        loadModel(ASSETS.cherry),
-        loadModel(ASSETS.blueberry),
-    ]);
+export async function initBerries(leavesBuilt) {
+    const [cherry] = await Promise.all([loadModel(ASSETS.cherry), leavesBuilt]);
     buildInstanced(cherry, 'cherry');
-    buildInstanced(blueberry, 'blueberry');
 
     for (let i = 0; i < COUNT; i++) {
         const ring = i / COUNT;
@@ -106,21 +102,13 @@ export async function initBerries() {
     }
 }
 
-export function warmBerries() {
-    const src = sets.cherry[0];
-    sets.blueberry.forEach((m) => {
-        if (src && m.instanceMatrix.array.length === src.instanceMatrix.array.length) {
-            m.instanceMatrix.array.set(src.instanceMatrix.array);
-            m.instanceMatrix.needsUpdate = true;
-        }
-        m.visible = true;
-    });
-    sets.cherry.forEach((m) => { m.visible = true; });
+export async function loadBlueberries() {
+    if (!sets.blueberry.length) buildInstanced(await loadModel(ASSETS.blueberry), 'blueberry');
+    return berryGroup;
 }
 
-export function settleBerries() {
-    sets.cherry.forEach((m) => { m.visible = active === 'cherry'; });
-    sets.blueberry.forEach((m) => { m.visible = active === 'blueberry'; });
+export function blueberryMaterials() {
+    return sets.blueberry.map((m) => m.material);
 }
 
 export function setBerryFlavor(flavor) {
