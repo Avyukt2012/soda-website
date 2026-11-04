@@ -20,6 +20,7 @@ export const lenis = new Lenis({
     smoothWheel: true,
     syncTouch: false,
     touchMultiplier: 1.6,
+    prevent: () => false,
 });
 
 export const scrollState = {

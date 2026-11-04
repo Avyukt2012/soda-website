@@ -1,10 +1,12 @@
 import { gsap, ScrollTrigger, scrollState, SCRUB } from '../scroll/smooth.js';
 import SplitText from 'gsap/SplitText';
 import { onFrame } from '../core/loop.js';
+import { isMobile } from '../config.js';
 
 gsap.registerPlugin(SplitText);
 
 const EASE_OUT = 'power4.out';
+const MARQUEE_VELOCITY_GAIN = isMobile ? 1 : 2.7;
 
 export function initTextReveals() {
     document.querySelectorAll('[data-split]').forEach((el) => {
@@ -100,8 +102,9 @@ export function initMarquee() {
 
     onFrame((delta) => {
         if (!live) return;
-        const boost = Math.min(Math.abs(scrollState.smoothVelocity) * 0.35, 26);
-        const skew = gsap.utils.clamp(-9, 9, scrollState.smoothVelocity * 0.22);
+        const velocity = scrollState.smoothVelocity * MARQUEE_VELOCITY_GAIN;
+        const boost = Math.min(Math.abs(velocity) * 0.35, 26);
+        const skew = gsap.utils.clamp(-9, 9, velocity * 0.22);
 
         state.forEach((s) => {
             s.offset -= (34 + boost) * s.dir * s.depth * delta;
